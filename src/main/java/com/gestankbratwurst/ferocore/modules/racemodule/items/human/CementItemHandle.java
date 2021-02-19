@@ -82,7 +82,7 @@ public class CementItemHandle implements CustomItemHandle {
     final Block placeBlock = REPLACEABLE_MATERIALS.contains(block.getType()) ? block : block.getRelative(event.getBlockFace());
 
     if (!REPLACEABLE_MATERIALS.contains(placeBlock.getType())) {
-      Msg.send(player, "Rasse", "Kein Platz zum Platzieren.");
+      Msg.send(player, "Rasse", "Kein Platz, um das zu Platzieren.");
       return;
     }
 
