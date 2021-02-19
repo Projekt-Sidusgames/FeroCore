@@ -1,0 +1,8 @@
+name: FeroCore
+version: ${project.version}
+main: com.gestankbratwurst.ferocore.FeroCore
+api-version: 1.16
+authors: [Gestankbratwurst]
+description: Core RP plugin
+depend:
+  - ProtocolLib
