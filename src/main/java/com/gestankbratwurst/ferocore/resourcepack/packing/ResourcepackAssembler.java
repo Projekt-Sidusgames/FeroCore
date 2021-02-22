@@ -407,26 +407,35 @@ public class ResourcepackAssembler {
       isr.close();
     }
     final JsonObject skinWriteJson = skinJson;
-    final File uploadFolder = new File(this.plugin.getDataFolder() + File.separator + "uploadcache");
-    if (!uploadFolder.exists()) {
-      uploadFolder.mkdirs();
-    }
-    for (final Model model : skinlessModels) {
-      final File imageFile = model.getLinkedImageFile();
-      Preconditions.checkState(imageFile != null);
-      final ConsumingCallback callback = this.playerSkinManager.callback(skin -> {
-        if (skin != null) {
-          skinWriteJson.addProperty(model.toString(), "" + skin.id);
-          model.setSkin(skin);
+    try {
+      for (final Model model : skinlessModels) {
+        final File imageFile = model.getLinkedImageFile();
+
+        Preconditions.checkState(imageFile != null);
+        final ConsumingCallback callback = this.playerSkinManager.callback(skin -> {
+          if (skin != null) {
+            skinWriteJson.addProperty(model.toString(), "" + skin.id);
+            System.out.println("Written Skin for " + model + ": " + skin.id);
+            model.setSkin(skin);
+          } else {
+            this.plugin.getLogger().warning("Callback on skin is null!");
+          }
+          System.out.println("Written model skin!");
+        });
+        callback.locked = true;
+        if (model.isPlayerSkinModel()) {
+          this.playerSkinManager.uploadImage(imageFile, "AC_MODEL_" + model.toString(), callback);
         } else {
-          this.plugin.getLogger().warning("Callback on skin is null!");
+          this.playerSkinManager.uploadAndScaleHeadImage(imageFile, "AC_MODEL_" + model.toString(), callback);
         }
-      });
-      this.playerSkinManager.uploadAndScaleHeadImage(imageFile, "AC_MODEL_" + model.toString(), callback);
-      while (callback.locked) {
-        this.await(250);
+
+        while (callback.locked) {
+          this.await(250);
+        }
+        this.await(100);
       }
-      this.await(100);
+    } catch (final Exception exception) {
+      exception.printStackTrace();
     }
 
     final OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(this.skinBackupFile));
@@ -489,7 +498,7 @@ public class ResourcepackAssembler {
           textureObject.addProperty("layer0", assetLibrary.getAssetModelLayer0(nmsName));
           modelObject.add("textures", textureObject);
         }
-        
+
         overrideArray = new JsonArray();
         modelObject.add("overrides", overrideArray);
 

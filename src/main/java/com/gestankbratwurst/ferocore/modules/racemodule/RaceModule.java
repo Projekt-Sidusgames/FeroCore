@@ -14,6 +14,8 @@ import com.gestankbratwurst.ferocore.modules.racemodule.items.elf.ElfOrbHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.elf.ElfOrbRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.human.CementItemHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.human.CementRecipe;
+import com.gestankbratwurst.ferocore.modules.racemodule.items.human.HolyBookHandle;
+import com.gestankbratwurst.ferocore.modules.racemodule.items.human.HolyBookRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.orc.OrcHornItemHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.orc.OrcHornRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.undead.UndeadTotemHandle;
@@ -113,6 +115,7 @@ public class RaceModule implements BaseModule {
     customItemManager.registerHandle(new UndeadTotemHandle());
     customItemManager.registerHandle(new CementItemHandle());
     customItemManager.registerHandle(new OrcHornItemHandle());
+    customItemManager.registerHandle(new HolyBookHandle());
 
     final CustomRecipeManager customRecipeManager = FeroCore.getModule(CustomRecipeModule.class).getCustomRecipeManager();
     customRecipeManager.registerShapedRecipe(new DwarfCanonRecipe());
@@ -121,6 +124,7 @@ public class RaceModule implements BaseModule {
     customRecipeManager.registerShapedRecipe(new CementRecipe());
     customRecipeManager.registerShapedRecipe(new UndeadTotemRecipe());
     customRecipeManager.registerShapedRecipe(new OrcHornRecipe());
+    customRecipeManager.registerShapedRecipe(new HolyBookRecipe());
   }
 
   @Override

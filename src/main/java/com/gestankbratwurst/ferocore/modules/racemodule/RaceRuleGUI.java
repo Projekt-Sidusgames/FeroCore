@@ -100,6 +100,9 @@ public class RaceRuleGUI implements InventoryProvider {
 
     return ClickableItem.of(icon, event -> {
       final Player player = (Player) event.getWhoClicked();
+      if (!FeroPlayer.of(player).getRace().isCrowned(player)) {
+        return;
+      }
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
       this.ruleSet.setState(type, currentState.next());
       this.reopen(player);

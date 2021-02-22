@@ -7,6 +7,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Values;
+import com.gestankbratwurst.ferocore.resourcepack.SkinChooserGUI;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.common.UtilItem;
@@ -55,6 +56,27 @@ public class DebugCommand extends BaseCommand {
   public void onModelItem(final Player sender, @Values("@Models") final Model skin) {
     sender.getInventory().addItem(skin.getItem());
     Msg.send(sender, "Debug", "Du erhälst das Item zu: " + skin);
+  }
+
+  @Subcommand("skin")
+  @CommandCompletion("@Skins")
+  public void onSkin(final Player sender, @Values("@Skins") final Model skin) {
+    skin.applySkinTo(sender);
+    Msg.send(sender, "Skins", "Dein skin wurde geändert: §e" + skin.toString());
+  }
+
+  @Subcommand("head skin")
+  @CommandCompletion("@Skins")
+  public void onHeadSkin(final Player sender, @Values("@Skins") final Model skin) {
+    sender.getInventory().addItem(skin.getHead());
+    Msg.send(sender, "Skins", "Kopf bekommen: §e" + skin.toString());
+  }
+
+  @Subcommand("skinchooser")
+  @CommandCompletion("@Skins")
+  public void onSkinChoose(final Player sender) {
+    SkinChooserGUI.open(sender);
+    Msg.send(sender, "Skins", "Wähle einen Skin.");
   }
 
 }

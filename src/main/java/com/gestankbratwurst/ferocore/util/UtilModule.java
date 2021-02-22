@@ -58,6 +58,9 @@ public class UtilModule implements BaseModule {
     plugin.getPaperCommandManager().registerCommand(new DebugCommand());
     plugin.getPaperCommandManager().getCommandCompletions()
         .registerStaticCompletion("Models", Arrays.stream(Model.values()).map(Enum::toString).collect(Collectors.toList()));
+    plugin.getPaperCommandManager().getCommandCompletions()
+        .registerStaticCompletion("Skins",
+            Arrays.stream(Model.values()).filter(Model::isHeadSkinEnabled).map(Enum::toString).collect(Collectors.toList()));
 
     GsonProvider.register(ItemStack.class, new ItemStackSerializer());
     GsonProvider.register(CraftItemStack.class, new ItemStackSerializer());

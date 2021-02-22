@@ -27,17 +27,23 @@ public class UtilLoc {
   }
 
   public static Location locFromString(final String locationString) {
-    String[] split = locationString.split("#-#");
-    World world = Bukkit.getWorld(UUID.fromString(split[0]));
-    double x = Double.parseDouble(split[1]);
-    double y = Double.parseDouble(split[2]);
-    double z = Double.parseDouble(split[3]);
-    float pitch = Float.parseFloat(split[4]);
-    float yaw = Float.parseFloat(split[5]);
+    final String[] split = locationString.split("#-#");
+    final World world = Bukkit.getWorld(UUID.fromString(split[0]));
+    final double x = Double.parseDouble(split[1]);
+    final double y = Double.parseDouble(split[2]);
+    final double z = Double.parseDouble(split[3]);
+    final float pitch = Float.parseFloat(split[4]);
+    final float yaw = Float.parseFloat(split[5]);
     if (world == null) {
       return null;
     }
     return new Location(world, x, y, z, pitch, yaw);
+  }
+
+  public static Location convertToChunkMiddle(final Location location) {
+    final int cx = ((location.getBlockX() >> 4) << 4) + 8;
+    final int cz = ((location.getBlockZ() >> 4) << 4) + 8;
+    return new Location(location.getWorld(), cx, location.getY(), cz);
   }
 
   public static String locToString(final Location location) {

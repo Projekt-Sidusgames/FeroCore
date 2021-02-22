@@ -74,10 +74,15 @@ public class RaceMemberListGUI implements InventoryProvider {
   private ClickableItem getMemberIcon(final FeroPlayer feroPlayer) {
     final ItemStack icon = new ItemBuilder(feroPlayer.getLastSeenHead()).name("§e" + feroPlayer.getLastSeenName()).build();
     return ClickableItem.of(icon, event -> {
+
+      final Player player = (Player) event.getWhoClicked();
       if (!this.viewerLeader) {
+        if (feroPlayer.getPlayerID().equals(player.getUniqueId())) {
+          UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+          RaceRuleGUI.open(player, feroPlayer.getPlayerID());
+        }
         return;
       }
-      final Player player = (Player) event.getWhoClicked();
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
       RaceRuleGUI.open(player, feroPlayer.getPlayerID());
     });

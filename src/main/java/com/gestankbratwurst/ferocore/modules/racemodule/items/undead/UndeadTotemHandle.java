@@ -33,7 +33,8 @@ import org.bukkit.inventory.ItemStack;
  */
 public class UndeadTotemHandle implements CustomItemHandle {
 
-  private static final EnumSet<Material> VALID_PLACE_MATERIALS = EnumSet.of(Material.AIR, Material.CAVE_AIR);
+  private static final EnumSet<Material> VALID_PLACE_MATERIALS = EnumSet
+      .of(Material.AIR, Material.CAVE_AIR, Material.GRASS, Material.TALL_GRASS);
 
   public UndeadTotemHandle() {
     CustomMobModule.registerCustomEntity("armor_stand", "temp_stand", EntityTypes.ARMOR_STAND, UndeadTotemEntity::new, 1);

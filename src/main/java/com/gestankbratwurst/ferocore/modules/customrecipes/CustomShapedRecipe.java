@@ -2,7 +2,9 @@ package com.gestankbratwurst.ferocore.modules.customrecipes;
 
 import com.gestankbratwurst.ferocore.util.common.NameSpaceFactory;
 import java.util.Arrays;
+import java.util.Map;
 import lombok.Getter;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -50,6 +52,24 @@ public abstract class CustomShapedRecipe {
 
   public void setShape(final String... shape) {
     this.handle.shape(shape);
+  }
+
+  public ItemStack[] getCraftingMatrix() {
+    final ItemStack[] matrix = new ItemStack[9];
+    final StringBuilder builder = new StringBuilder();
+    for (final String line : this.getHandle().getShape()) {
+      String finalLine = line;
+      if (line.length() != 3) {
+        finalLine = StringUtils.rightPad(" ", 3 - line.length());
+      }
+      builder.append(finalLine);
+    }
+    final Map<Character, ItemStack> ingredientMap = this.getHandle().getIngredientMap();
+    final String results = builder.toString();
+    for (int i = 0; i < matrix.length; i++) {
+      matrix[i] = ingredientMap.get(results.charAt(i));
+    }
+    return matrix;
   }
 
   public abstract boolean canCraft(Player player);

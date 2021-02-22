@@ -1,8 +1,15 @@
 package com.gestankbratwurst.ferocore.modules.racemodule.races;
 
+import com.gestankbratwurst.ferocore.FeroCore;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeManager;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeModule;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -172,5 +179,37 @@ public class HumanRace extends Race {
   @Override
   public Model getRaceLeaderCrownModel() {
     return Model.HUMAN_CROWN;
+  }
+
+  @Override
+  public List<Model> listChoosableSkins() {
+    if (this.choosableSkins == null) {
+      this.choosableSkins = ImmutableList.of(
+          Model.HUMAN_SKIN_1,
+          Model.HUMAN_SKIN_2,
+          Model.HUMAN_SKIN_3,
+          Model.HUMAN_SKIN_4,
+          Model.HUMAN_SKIN_5,
+          Model.HUMAN_SKIN_6,
+          Model.HUMAN_SKIN_7,
+          Model.HUMAN_SKIN_8,
+          Model.HUMAN_SKIN_9,
+          Model.HUMAN_SKIN_10
+      );
+    }
+    return this.choosableSkins;
+  }
+
+  @Override
+  public List<CustomShapedRecipe> listRaceRecipes() {
+    final List<CustomShapedRecipe> recipeList = new ArrayList<>();
+    final CustomRecipeManager manager = FeroCore.getModule(CustomRecipeModule.class).getCustomRecipeManager();
+    recipeList.add(manager.getRecipeForKey("holy_book"));
+    return recipeList;
+  }
+
+  @Override
+  public List<RoleType> getChoosableRoles() {
+    return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.BOW_FIGHTER, RoleType.AXE_FIGHTER, RoleType.ALCHEMIST);
   }
 }

@@ -57,7 +57,7 @@ public class RaceListener implements Listener {
     if (feroPlayer.hasChosenRace()) {
       final Race race = feroPlayer.getRace();
       race.onLogin(player);
-      race.setAsOnline(player.getUniqueId());
+      race.setAsOnline(player);
     } else {
       Msg.send(event.getPlayer(), "Rasse", "Du hast noch keine Rasse gewählt.");
       Msg.send(event.getPlayer(), "Rasse", "Benutze " + Msg.elem("/rasse") + ", um eine Rasse zu wählen.");

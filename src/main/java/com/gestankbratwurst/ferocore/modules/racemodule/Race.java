@@ -1,6 +1,8 @@
 package com.gestankbratwurst.ferocore.modules.racemodule;
 
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.util.common.NameSpaceFactory;
 import com.gestankbratwurst.ferocore.util.items.ItemBuilder;
@@ -11,11 +13,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
@@ -57,16 +61,49 @@ public abstract class Race {
   @Getter
   protected final RaceRuleSet defaultRuleSet = new RaceRuleSet();
 
+  private final Map<RoleType, Integer> raceRoles = new HashMap<>();
   protected final Set<RaceType> atWarSet = new HashSet<>();
   protected final Set<RaceType> peaceRequests = new HashSet<>();
+  private final Map<Model, MutableInt> skinCountMap = new HashMap<>();
 
   protected final Set<UUID> members = new HashSet<>();
   protected final Set<UUID> onlineMembers = new HashSet<>();
   protected final Map<UUID, RaceRuleSet> memberRules = new HashMap<>();
+  private final Map<UUID, Model> playerChosenSkins = new HashMap<>();
+  protected transient List<Model> choosableSkins = null;
 
   public Race(final String displayName, final Model icon) {
     this.displayName = displayName;
     this.icon = icon;
+    for (final RoleType roleType : RoleType.values()) {
+      this.raceRoles.put(roleType, 0);
+    }
+    for (final Model model : this.listChoosableSkins()) {
+      this.skinCountMap.put(model, new MutableInt());
+    }
+  }
+
+  protected void applySkinChange(final UUID playerID, final Model oldSkin, final Model newSkin) {
+    if (oldSkin == newSkin) {
+      return;
+    }
+    if (oldSkin != null) {
+      this.skinCountMap.get(oldSkin).decrement();
+    }
+    this.skinCountMap.get(newSkin).increment();
+    this.playerChosenSkins.put(playerID, newSkin);
+    final Player player = Bukkit.getPlayer(playerID);
+    if (player != null) {
+      newSkin.applySkinTo(player);
+    }
+  }
+
+  public int getAmountOfRole(final RoleType roleType) {
+    return this.raceRoles.get(roleType);
+  }
+
+  public int getTotalRolesChosen() {
+    return this.raceRoles.values().stream().mapToInt(Integer::intValue).sum();
   }
 
   public void removePeaceRequest(final RaceType otherRace) {
@@ -81,12 +118,24 @@ public abstract class Race {
     return this.peaceRequests.contains(raceType);
   }
 
+  public Model getSkinOf(final Player player) {
+    return this.playerChosenSkins.get(player.getUniqueId());
+  }
+
   public boolean isAtWarWith(final RaceType raceType) {
     return this.atWarSet.contains(raceType);
   }
 
   public void addWarEnemy(final RaceType raceType) {
     this.atWarSet.add(raceType);
+  }
+
+  public double getSkinPercentage(final Model model) {
+    final MutableInt mutable = this.skinCountMap.get(model);
+    if (mutable == null) {
+      return 0;
+    }
+    return (int) (1000.0 / this.skinCountMap.values().stream().mapToInt(MutableInt::intValue).sum() * mutable.intValue()) / 10.0;
   }
 
   public RaceRuleState getEffectiveRuleState(final UUID playerID, final RaceRuleType rule) {
@@ -212,11 +261,12 @@ public abstract class Race {
     this.members.stream().map(FeroPlayer::of).forEach(feroPlayerConsumer);
   }
 
-  public void setAsOnline(final UUID memberID) {
-    if (!this.members.contains(memberID)) {
+  public void setAsOnline(final Player player) {
+    if (!this.members.contains(player.getUniqueId())) {
       throw new UnsupportedOperationException();
     }
-    this.onlineMembers.add(memberID);
+    this.onlineMembers.add(player.getUniqueId());
+    this.playerChosenSkins.get(player.getUniqueId()).applySkinTo(player);
   }
 
   public void setAsOffline(final UUID memberID) {
@@ -230,15 +280,19 @@ public abstract class Race {
     this.members.add(playerID);
     this.memberRules.put(playerID, new RaceRuleSet());
     final Player player = Bukkit.getPlayer(playerID);
+    final List<Model> skins = this.listChoosableSkins();
+    this.applySkinChange(playerID, null, skins.get(ThreadLocalRandom.current().nextInt(skins.size())));
     if (player != null) {
-      this.setAsOnline(playerID);
+      this.setAsOnline(player);
     }
   }
 
   public void removeMember(final UUID playerID) {
+    this.skinCountMap.get(this.playerChosenSkins.get(playerID)).decrement();
     this.members.remove(playerID);
     this.memberRules.remove(playerID);
     this.onlineMembers.remove(playerID);
+    this.playerChosenSkins.remove(playerID);
   }
 
   public int getMemberCount() {
@@ -276,5 +330,11 @@ public abstract class Race {
   public abstract List<String> getDescription();
 
   public abstract Model getRaceLeaderCrownModel();
+
+  public abstract List<Model> listChoosableSkins();
+
+  public abstract List<CustomShapedRecipe> listRaceRecipes();
+
+  public abstract List<RoleType> getChoosableRoles();
 
 }

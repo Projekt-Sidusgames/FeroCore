@@ -1,10 +1,17 @@
 package com.gestankbratwurst.ferocore.modules.racemodule.races;
 
+import com.gestankbratwurst.ferocore.FeroCore;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeManager;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeModule;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.util.Msg;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -217,5 +224,38 @@ public class DwarfRace extends Race {
   @Override
   public Model getRaceLeaderCrownModel() {
     return Model.DWARF_CROWN;
+  }
+
+  @Override
+  public List<Model> listChoosableSkins() {
+    if (this.choosableSkins == null) {
+      this.choosableSkins = ImmutableList.of(
+          Model.DWARF_SKIN_1,
+          Model.DWARF_SKIN_2,
+          Model.DWARF_SKIN_3,
+          Model.DWARF_SKIN_4,
+          Model.DWARF_SKIN_5,
+          Model.DWARF_SKIN_6,
+          Model.DWARF_SKIN_7,
+          Model.DWARF_SKIN_8,
+          Model.DWARF_SKIN_9,
+          Model.DWARF_SKIN_10
+      );
+    }
+    return this.choosableSkins;
+  }
+
+  @Override
+  public List<CustomShapedRecipe> listRaceRecipes() {
+    final List<CustomShapedRecipe> recipeList = new ArrayList<>();
+    final CustomRecipeManager manager = FeroCore.getModule(CustomRecipeModule.class).getCustomRecipeManager();
+    recipeList.add(manager.getRecipeForKey("canon_ball"));
+    recipeList.add(manager.getRecipeForKey("dwarf_canon"));
+    return recipeList;
+  }
+
+  @Override
+  public List<RoleType> getChoosableRoles() {
+    return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.AXE_FIGHTER, RoleType.ALCHEMIST);
   }
 }

@@ -7,22 +7,16 @@ import com.gestankbratwurst.ferocore.util.Msg;
 import com.gestankbratwurst.ferocore.util.common.ChatInput;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
 import com.gestankbratwurst.ferocore.util.items.ItemBuilder;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.crytec.inventoryapi.SmartInventory;
 import net.crytec.inventoryapi.api.ClickableItem;
 import net.crytec.inventoryapi.api.InventoryContent;
 import net.crytec.inventoryapi.api.InventoryProvider;
 import net.crytec.inventoryapi.api.SlotPos;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockIterator;
-import org.bukkit.util.Vector;
 
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
@@ -70,6 +64,8 @@ public class RaceMainGUI implements InventoryProvider {
     content.set(SlotPos.of(1, 4), this.getQuestsIcon());
     content.set(SlotPos.of(1, 6), this.getDiplomacyIcon());
     content.set(SlotPos.of(3, 2), this.getBroadcastIcon());
+    content.set(SlotPos.of(3, 4), this.getSkinChooserIcon(player));
+    content.set(SlotPos.of(3, 6), this.getRecipeIcon());
 
     final ItemStack headItem = player.getInventory().getHelmet();
     if (this.race.isCrownOfRace(headItem)) {
@@ -105,6 +101,23 @@ public class RaceMainGUI implements InventoryProvider {
     });
   }
 
+  private ClickableItem getSkinChooserIcon(final Player player) {
+    final ItemStack icon = new ItemBuilder(this.race.getSkinOf(player).getHead()).name("§eSkin wählen").build();
+    return ClickableItem.of(icon, event -> {
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      RaceSkinChooserGUI.open(player);
+    });
+  }
+
+  private ClickableItem getRecipeIcon() {
+    final ItemStack icon = new ItemBuilder(Material.CRAFTING_TABLE).name("§eRassen Rezepte").build();
+    return ClickableItem.of(icon, event -> {
+      final Player player = (Player) event.getWhoClicked();
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      RaceRecipeSelectionGUI.open(player);
+    });
+  }
+
   private ClickableItem getBroadcastIcon() {
     final ItemStack icon = new ItemBuilder(Model.HORN_ICON.getItem())
         .name("§eKundgebung")
@@ -133,16 +146,6 @@ public class RaceMainGUI implements InventoryProvider {
     });
   }
 
-  public List<Block> getBlocksBetween(final Location from, final Location to) {
-    final List<Block> blockList = new ArrayList<>();
-
-    final Vector direction = to.toVector().subtract(from.toVector());
-    final int length = (int) direction.length();
-    final BlockIterator iterator = new BlockIterator(from.getWorld(), from.toVector(), direction, 0, length);
-    iterator.forEachRemaining(blockList::add);
-
-    return blockList;
-  }
 
   private ClickableItem getRaceLeaderIcon() {
     final ItemStack icon = new ItemBuilder(this.race.getIcon().getItem()).name("§eAnführermenü").build();

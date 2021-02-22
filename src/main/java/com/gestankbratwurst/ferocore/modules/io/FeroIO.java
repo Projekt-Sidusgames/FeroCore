@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +28,8 @@ public class FeroIO {
 
   private final File playerDataFolder;
   private final File raceFolder;
+  private final File worldProtectionFolder;
+  private final File schematicFolder;
   private final FeroConfiguration feroConfiguration;
 
   public FeroIO(final JavaPlugin plugin) {
@@ -37,6 +40,14 @@ public class FeroIO {
     this.playerDataFolder = new File(pluginFolder, "playerdata");
     if (!this.playerDataFolder.exists()) {
       this.playerDataFolder.mkdirs();
+    }
+    this.schematicFolder = new File(pluginFolder, "schematics");
+    if (!this.schematicFolder.exists()) {
+      this.schematicFolder.mkdirs();
+    }
+    this.worldProtectionFolder = new File(pluginFolder, "worldprotection");
+    if (!this.worldProtectionFolder.exists()) {
+      this.worldProtectionFolder.mkdirs();
     }
     this.raceFolder = new File(pluginFolder, "racedata");
     if (!this.raceFolder.exists()) {
@@ -51,6 +62,13 @@ public class FeroIO {
 
   public FeroConfiguration getConfig() {
     return this.feroConfiguration;
+  }
+
+  private File getWorldProtectionFile(final UUID worldID) {
+    if (worldID == null) {
+      throw new IllegalStateException();
+    }
+    return new File(this.worldProtectionFolder, worldID.toString() + ".json");
   }
 
   private File getPlayerDataFile(final UUID playerID) {
@@ -125,4 +143,46 @@ public class FeroIO {
     players.forEach(this::saveFeroPlayer);
   }
 
+  public void saveWorldProtectionData(final UUID worldID, final String toJson) {
+    try {
+      Files.writeString(this.getWorldProtectionFile(worldID).toPath(), toJson);
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void saveSchematicManager(final String data) {
+    final File schematicFile = new File(this.schematicFolder, "manager.json");
+    try {
+      Files.writeString(schematicFile.toPath(), data);
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public String loadSchematicManager() {
+    final File schematicFile = new File(this.schematicFolder, "manager.json");
+    String data = null;
+    try {
+      if (schematicFile.exists()) {
+        data = Files.readString(schematicFile.toPath());
+      }
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+    return data;
+  }
+
+  public Optional<String> loadWorldProtectionData(final UUID worldID) {
+    String data = null;
+    try {
+      final File worldFile = this.getWorldProtectionFile(worldID);
+      if (worldFile.exists()) {
+        data = Files.readString(this.getWorldProtectionFile(worldID).toPath());
+      }
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+    return Optional.ofNullable(data);
+  }
 }

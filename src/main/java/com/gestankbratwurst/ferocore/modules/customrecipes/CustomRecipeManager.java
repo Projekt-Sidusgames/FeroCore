@@ -23,10 +23,16 @@ import org.bukkit.inventory.ShapedRecipe;
 public class CustomRecipeManager {
 
   private final Map<NamespacedKey, CustomShapedRecipe> shapedRecipeMap = new HashMap<>();
+  private final Map<String, CustomShapedRecipe> simpleShapedRecipeMap = new HashMap<>();
+
+  public CustomShapedRecipe getRecipeForKey(final String key) {
+    return this.simpleShapedRecipeMap.get(key);
+  }
 
   public void registerShapedRecipe(final CustomShapedRecipe customShapedRecipe) {
     final ShapedRecipe recipe = customShapedRecipe.getHandle();
     this.shapedRecipeMap.put(recipe.getKey(), customShapedRecipe);
+    this.simpleShapedRecipeMap.put(recipe.getKey().getKey(), customShapedRecipe);
     Bukkit.addRecipe(recipe);
   }
 

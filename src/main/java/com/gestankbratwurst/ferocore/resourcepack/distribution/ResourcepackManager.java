@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,7 +27,7 @@ public class ResourcepackManager {
   private ResourcepackServer server;
   private final File pack;
 
-  public ResourcepackManager() {
+  public ResourcepackManager(final Consumer<Void> serverStartupCallback) {
     final FeroCore plugin = JavaPlugin.getPlugin(FeroCore.class);
     final FeroConfiguration configuration = plugin.getFeroIO().getConfig();
     this.port = configuration.getResourcePackServerPort();
@@ -34,7 +35,7 @@ public class ResourcepackManager {
     final File stampFolder = new File(plugin.getDataFolder() + File.separator + ResourcepackManager.SERVER_TIMESTAMP);
     this.pack = new File(stampFolder, ResourcepackManager.RESOURCEPACK_FILE_NAME);
     this.hash = this.getFileHashChecksum(this.pack, plugin);
-    CompletableFuture.runAsync(() -> this.startServer(plugin));
+    CompletableFuture.runAsync(() -> this.startServer(plugin)).thenAccept(serverStartupCallback);
   }
 
   public String getResourceHash() {

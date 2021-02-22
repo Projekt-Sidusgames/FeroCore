@@ -1,11 +1,13 @@
 package com.gestankbratwurst.ferocore.modules.playermodule;
 
+import com.gestankbratwurst.ferocore.resourcepack.ResourcepackModule;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerLoginEvent;
 
 /*******************************************************
@@ -24,6 +26,11 @@ public class PlayerDataListener implements Listener {
 
   @EventHandler
   public void onPreLogin(final AsyncPlayerPreLoginEvent event) {
+    if (!ResourcepackModule.isServerRunning()) {
+      event.disallow(Result.KICK_FULL, "Der Resourcepack Server startet noch.");
+      event.setLoginResult(Result.KICK_FULL);
+      return;
+    }
     // TODO check for registration
   }
 

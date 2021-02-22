@@ -1,9 +1,16 @@
 package com.gestankbratwurst.ferocore.modules.racemodule.races;
 
+import com.gestankbratwurst.ferocore.FeroCore;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeManager;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeModule;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.entity.Player;
@@ -155,5 +162,37 @@ public class UndeadRace extends Race {
   @Override
   public Model getRaceLeaderCrownModel() {
     return Model.UNDEAD_CROWN;
+  }
+
+  @Override
+  public List<Model> listChoosableSkins() {
+    if (this.choosableSkins == null) {
+      this.choosableSkins = ImmutableList.of(
+          Model.UNDEAD_SKIN_1,
+          Model.UNDEAD_SKIN_2,
+          Model.UNDEAD_SKIN_3,
+          Model.UNDEAD_SKIN_4,
+          Model.UNDEAD_SKIN_5,
+          Model.UNDEAD_SKIN_6,
+          Model.UNDEAD_SKIN_7,
+          Model.UNDEAD_SKIN_8,
+          Model.UNDEAD_SKIN_9,
+          Model.UNDEAD_SKIN_10
+      );
+    }
+    return this.choosableSkins;
+  }
+
+  @Override
+  public List<CustomShapedRecipe> listRaceRecipes() {
+    final List<CustomShapedRecipe> recipeList = new ArrayList<>();
+    final CustomRecipeManager manager = FeroCore.getModule(CustomRecipeModule.class).getCustomRecipeManager();
+    recipeList.add(manager.getRecipeForKey("undead_totem"));
+    return recipeList;
+  }
+
+  @Override
+  public List<RoleType> getChoosableRoles() {
+    return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.BOW_FIGHTER, RoleType.SPEAR_FIGHTER, RoleType.SHAMAN);
   }
 }

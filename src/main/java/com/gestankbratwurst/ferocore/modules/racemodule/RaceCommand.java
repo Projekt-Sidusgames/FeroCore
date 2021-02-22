@@ -7,6 +7,7 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.elf.ElfOrbHandle;
+import com.gestankbratwurst.ferocore.modules.racemodule.items.human.HolyBookHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.undead.UndeadTotemHandle;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.ChatColor;
@@ -79,6 +80,13 @@ public class RaceCommand extends BaseCommand {
   @CommandPermission("admin")
   public void onUndeadTotem(final Player player) {
     final ItemStack item = UndeadTotemHandle.createTotem();
+    player.getInventory().addItem(item);
+  }
+
+  @Subcommand("admin holybook")
+  @CommandPermission("admin")
+  public void onHolyBook(final Player player) {
+    final ItemStack item = HolyBookHandle.createBook();
     player.getInventory().addItem(item);
   }
 

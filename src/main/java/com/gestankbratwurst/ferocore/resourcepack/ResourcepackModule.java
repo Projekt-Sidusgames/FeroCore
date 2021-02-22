@@ -7,9 +7,13 @@ import com.gestankbratwurst.ferocore.resourcepack.distribution.ResourcepackManag
 import com.gestankbratwurst.ferocore.resourcepack.packing.AssetLibrary;
 import com.gestankbratwurst.ferocore.resourcepack.packing.ResourcepackAssembler;
 import java.util.concurrent.CompletableFuture;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 
 public class ResourcepackModule implements BaseModule {
+
+  @Getter
+  private static boolean serverRunning = false;
 
   private ResourcepackManager resourcepackManager;
   private AssetLibrary assetLibrary;
@@ -17,6 +21,7 @@ public class ResourcepackModule implements BaseModule {
   @Override
   public void enable(final FeroCore plugin) {
     this.assetLibrary = new AssetLibrary(plugin);
+    plugin.getLogger().info("Blocking main thread. Waiting for resourcepack server to start.");
     CompletableFuture.runAsync(() -> {
       try {
         new ResourcepackAssembler(plugin, this.assetLibrary).zipResourcepack();
@@ -25,13 +30,13 @@ public class ResourcepackModule implements BaseModule {
       }
     }).thenRun(() -> {
       try {
-        this.resourcepackManager = new ResourcepackManager();
+        this.resourcepackManager = new ResourcepackManager((v) -> serverRunning = true);
       } catch (final Exception exception) {
         exception.printStackTrace();
         Bukkit.shutdown();
       }
       FeroCore.registerListener(new ResourcepackListener(plugin, this.resourcepackManager));
-    });
+    }).join();
   }
 
   @Override

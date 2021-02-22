@@ -1,5 +1,6 @@
 package com.gestankbratwurst.ferocore.modules.playermodule;
 
+import com.gestankbratwurst.ferocore.modules.protectionmodule.ProtectionSession;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.racemodule.RaceType;
 import com.gestankbratwurst.ferocore.util.common.UtilItem;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
@@ -46,6 +48,7 @@ public class FeroPlayer {
     this.tags = new HashSet<>();
     this.loginRemoverTags = new HashMap<>();
     this.playerID = playerID;
+    this.protectionSession = new ProtectionSession(playerID);
   }
 
   @Setter
@@ -55,6 +58,8 @@ public class FeroPlayer {
   private final UUID playerID;
   @Getter
   private RaceType raceType;
+  @Getter
+  private final ProtectionSession protectionSession;
 
   private final Set<String> tags;
   private final Map<String, Integer> loginRemoverTags;
@@ -114,4 +119,7 @@ public class FeroPlayer {
     new ArrayList<>(this.loginRemoverTags.keySet()).forEach(this::removeTag);
   }
 
+  public Optional<Player> getOnlinePlayer() {
+    return Optional.ofNullable(Bukkit.getPlayer(this.playerID));
+  }
 }

@@ -72,6 +72,7 @@ public class EvenDistributedRaceTicker implements Runnable {
       if (fp.hasChosenRace()) {
         fp.getRace().onSecond(Bukkit.getPlayer(uuid));
       }
+      fp.getProtectionSession().tick();
     }
     this.proceedPosition();
   }

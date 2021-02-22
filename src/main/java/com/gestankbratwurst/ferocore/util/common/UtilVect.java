@@ -1,6 +1,16 @@
 package com.gestankbratwurst.ferocore.util.common;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Particle.DustOptions;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
@@ -24,6 +34,76 @@ public class UtilVect {
     return new String(buffer.array());
   }
 
+  public static void forEachBlock(final BoundingBox box, final World world, final Consumer<Block> blockConsumer) {
+    for (int x = (int) box.getMinX(); x <= (int) box.getMaxX(); x++) {
+      for (int y = (int) box.getMinY(); y <= (int) box.getMaxY(); y++) {
+        for (int z = (int) box.getMinZ(); z <= (int) box.getMaxZ(); z++) {
+          blockConsumer.accept(world.getBlockAt(x, y, z));
+        }
+      }
+    }
+  }
+
+  public static void showBoundingBox(final BoundingBox box, final Player player, final int viewDist) {
+    final World world = player.getWorld();
+    final double maxDistSq = viewDist * viewDist;
+    final Location iii = new Location(world, box.getMinX(), box.getMinY(), box.getMinZ());
+    final Location iai = new Location(world, box.getMinX(), box.getMaxY(), box.getMinZ());
+    final Location aii = new Location(world, box.getMaxX(), box.getMinY(), box.getMinZ());
+    final Location aia = new Location(world, box.getMaxX(), box.getMinY(), box.getMaxZ());
+    final Location iia = new Location(world, box.getMinX(), box.getMinY(), box.getMaxZ());
+    final Location aai = new Location(world, box.getMaxX(), box.getMaxY(), box.getMinZ());
+    final Location iaa = new Location(world, box.getMinX(), box.getMaxY(), box.getMaxZ());
+    final Location aaa = new Location(world, box.getMaxX(), box.getMaxY(), box.getMaxZ());
+
+    final List<Location> points = new ArrayList<>();
+
+    points.addAll(getPointsBetween(iii, aii));
+    points.addAll(getPointsBetween(iii, iia));
+    points.addAll(getPointsBetween(iii, iai));
+
+    points.addAll(getPointsBetween(aia, aii));
+    points.addAll(getPointsBetween(aia, iia));
+
+    points.addAll(getPointsBetween(iai, aai));
+    points.addAll(getPointsBetween(iai, iaa));
+    points.addAll(getPointsBetween(iaa, iia));
+
+    points.addAll(getPointsBetween(aii, aai));
+    points.addAll(getPointsBetween(aii, aai));
+
+    points.addAll(getPointsBetween(aaa, aai));
+    points.addAll(getPointsBetween(aaa, iaa));
+    points.addAll(getPointsBetween(aaa, aia));
+
+    particles(points, player.getLocation(), maxDistSq);
+  }
+
+  private static List<Location> getPointsBetween(Location from, Location to) {
+    final List<Location> locations = new ArrayList<>();
+    from = from.clone();
+    to = to.clone();
+    final Vector dir = to.toVector().subtract(from.toVector());
+    final int increments = (int) (dir.length() / 0.75);
+    dir.normalize().multiply(0.75);
+    for (int i = 0; i < increments; i++) {
+      from.add(dir);
+      locations.add(from.clone());
+    }
+
+    return locations;
+  }
+
+  private static void particles(final List<Location> locations, final Location view, final double distSq) {
+    final DustOptions options = new DustOptions(Color.RED, 1F);
+    final World world = view.getWorld();
+    for (final Location point : locations) {
+      if (view.toVector().subtract(point.toVector()).lengthSquared() < distSq) {
+        world.spawnParticle(Particle.REDSTONE, point, 1, 0, 0, 0, 0, options);
+      }
+    }
+  }
+
   public static Vector vecFromString(final String vectorKey) {
     final ByteBuffer buffer = ByteBuffer.wrap(vectorKey.getBytes());
     buffer.rewind();
@@ -38,9 +118,9 @@ public class UtilVect {
   }
 
   public static BoundingBox stringToBox(final String boxString) {
-    String[] split = boxString.split("#");
-    Vector max = new Vector(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
-    Vector min = new Vector(Double.parseDouble(split[3]), Double.parseDouble(split[4]), Double.parseDouble(split[5]));
+    final String[] split = boxString.split("#");
+    final Vector max = new Vector(Double.parseDouble(split[0]), Double.parseDouble(split[1]), Double.parseDouble(split[2]));
+    final Vector min = new Vector(Double.parseDouble(split[3]), Double.parseDouble(split[4]), Double.parseDouble(split[5]));
     return BoundingBox.of(max, min);
   }
 
