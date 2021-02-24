@@ -2,6 +2,7 @@ package com.gestankbratwurst.ferocore.modules.rolemodule;
 
 import com.gestankbratwurst.ferocore.FeroCore;
 import com.gestankbratwurst.ferocore.modules.BaseModule;
+import com.gestankbratwurst.ferocore.util.UtilModule;
 
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
@@ -16,7 +17,7 @@ public class RoleModule implements BaseModule {
 
   @Override
   public void enable(final FeroCore plugin) {
-
+    FeroCore.registerListener(new RoleListener(FeroCore.getModule(UtilModule.class).getHologramManager()));
   }
 
   @Override

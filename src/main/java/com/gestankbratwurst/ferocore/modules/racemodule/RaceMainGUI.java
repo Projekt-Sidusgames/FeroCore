@@ -1,12 +1,17 @@
 package com.gestankbratwurst.ferocore.modules.racemodule;
 
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
+import com.gestankbratwurst.ferocore.modules.playermodule.PlayerOptionGUI;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.Quest;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleChooserGUI;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.Msg;
 import com.gestankbratwurst.ferocore.util.common.ChatInput;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
+import com.gestankbratwurst.ferocore.util.items.CustomHeads;
 import com.gestankbratwurst.ferocore.util.items.ItemBuilder;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.crytec.inventoryapi.SmartInventory;
 import net.crytec.inventoryapi.api.ClickableItem;
@@ -60,12 +65,21 @@ public class RaceMainGUI implements InventoryProvider {
   @Override
   public void init(final Player player, final InventoryContent content) {
 
-    content.set(SlotPos.of(1, 2), this.getMemberListIcon());
-    content.set(SlotPos.of(1, 4), this.getQuestsIcon());
-    content.set(SlotPos.of(1, 6), this.getDiplomacyIcon());
-    content.set(SlotPos.of(3, 2), this.getBroadcastIcon());
-    content.set(SlotPos.of(3, 4), this.getSkinChooserIcon(player));
-    content.set(SlotPos.of(3, 6), this.getRecipeIcon());
+    content.set(SlotPos.of(1, 1), this.getMemberListIcon());
+    content.set(SlotPos.of(1, 3), this.getQuestsIcon());
+    content.set(SlotPos.of(1, 5), this.getDiplomacyIcon());
+    content.set(SlotPos.of(1, 7), this.getBroadcastIcon());
+    content.set(SlotPos.of(3, 1), this.getSkinChooserIcon(player));
+    content.set(SlotPos.of(3, 3), this.getRecipeIcon());
+
+    content.set(SlotPos.of(3, 7), this.getOptionsIcon());
+
+    final FeroPlayer feroPlayer = FeroPlayer.of(player);
+    if (feroPlayer.hasChosenRole()) {
+      content.set(SlotPos.of(3, 5), this.getRoleStatsGUI(player));
+    } else {
+      content.set(SlotPos.of(3, 5), this.getRoleChooserIcon());
+    }
 
     final ItemStack headItem = player.getInventory().getHelmet();
     if (this.race.isCrownOfRace(headItem)) {
@@ -98,6 +112,21 @@ public class RaceMainGUI implements InventoryProvider {
           this.reopen(player);
         });
       }
+    });
+  }
+
+  private ClickableItem getRoleStatsGUI(final Player player) {
+    final ItemStack icon = new ItemBuilder(Model.ROLE_ICON.getItem()).name("§c- TODO -").build();
+    return ClickableItem.of(icon, event -> {
+    });
+  }
+
+  private ClickableItem getRoleChooserIcon() {
+    final ItemStack icon = new ItemBuilder(Model.ROLE_ICON.getItem()).name("§eKlasse wählen").build();
+    return ClickableItem.of(icon, event -> {
+      final Player player = (Player) event.getWhoClicked();
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      RoleChooserGUI.open(player);
     });
   }
 
@@ -146,6 +175,14 @@ public class RaceMainGUI implements InventoryProvider {
     });
   }
 
+  private ClickableItem getOptionsIcon() {
+    final ItemStack icon = new ItemBuilder(CustomHeads.GLOBE.getItem()).name("§eDeine Optionen").build();
+    return ClickableItem.of(icon, event -> {
+      final Player player = (Player) event.getWhoClicked();
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      PlayerOptionGUI.open(player);
+    });
+  }
 
   private ClickableItem getRaceLeaderIcon() {
     final ItemStack icon = new ItemBuilder(this.race.getIcon().getItem()).name("§eAnführermenü").build();
@@ -187,12 +224,24 @@ public class RaceMainGUI implements InventoryProvider {
   }
 
   private ClickableItem getQuestsIcon() {
-    final ItemStack icon = new ItemBuilder(Model.LETTER_NO.getItem())
+    final ItemBuilder icon = new ItemBuilder(Model.LETTER_NO.getItem())
         .name("§eQuests")
-        .lore("")
-        .lore("§7Es gibt momentan keine Quests.")
-        .build();
-    return ClickableItem.empty(icon);
+        .lore("");
+
+    final List<Quest> quests = this.race.getActiveQuests();
+    if (quests.isEmpty()) {
+      icon.lore("§7Es gibt momentan keine Quests.");
+    } else {
+      for (final Quest quest : quests) {
+        icon.lore("§f- " + quest.getName() + " für §e" + quest.getRewardPoints() + "§f Punkte [§e" + quest.getProgressPercent() + "%§f]");
+      }
+    }
+
+    return ClickableItem.of(icon.build(), event -> {
+      final Player player = (Player) event.getWhoClicked();
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      RaceQuestGUI.open(player);
+    });
   }
 
 }

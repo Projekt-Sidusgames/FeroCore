@@ -2,12 +2,20 @@ package com.gestankbratwurst.ferocore.modules.racemodule;
 
 import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.GatherQuest;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.KillQuest;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.Quest;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.QuestGenerator;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.QuestProgressionResponse;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.util.common.NameSpaceFactory;
 import com.gestankbratwurst.ferocore.util.items.ItemBuilder;
+import com.gestankbratwurst.ferocore.util.tasks.TaskManager;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +31,8 @@ import org.apache.commons.lang.mutable.MutableInt;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
@@ -71,6 +81,8 @@ public abstract class Race {
   protected final Map<UUID, RaceRuleSet> memberRules = new HashMap<>();
   private final Map<UUID, Model> playerChosenSkins = new HashMap<>();
   protected transient List<Model> choosableSkins = null;
+  private final Set<Quest> activeQuests;
+  private int questPoints = 0;
 
   public Race(final String displayName, final Model icon) {
     this.displayName = displayName;
@@ -80,6 +92,29 @@ public abstract class Race {
     }
     for (final Model model : this.listChoosableSkins()) {
       this.skinCountMap.put(model, new MutableInt());
+    }
+    this.activeQuests = new LinkedHashSet<>();
+  }
+
+  public List<Quest> getActiveQuests() {
+    return new ArrayList<>(this.activeQuests);
+  }
+
+  public void dummyQuestCompletion(final int questPoints) {
+    for (final Player player : Bukkit.getOnlinePlayers()) {
+      this.playThemeSound(player);
+      final String msg =
+          "§fDie §e" + this.getDisplayName() + " §fhaben eine Quest für §e" + questPoints + " Punkte §fabgeschlossen";
+      player.sendTitle("", msg, 20, 60, 20);
+    }
+  }
+
+  private void broadcastQuestCompletion(final Quest quest) {
+    for (final Player player : Bukkit.getOnlinePlayers()) {
+      this.playThemeSound(player);
+      final String msg =
+          "§fDie §e" + this.getDisplayName() + " §fhaben eine Quest für §e" + quest.getRewardPoints() + " Punkte §fabgeschlossen";
+      player.sendTitle("", msg, 20, 60, 20);
     }
   }
 
@@ -96,6 +131,42 @@ public abstract class Race {
     if (player != null) {
       newSkin.applySkinTo(player);
     }
+  }
+
+  public void handleQuestItemPickup(final Item item, final Player who) {
+    for (final Quest quest : this.activeQuests) {
+      if (quest instanceof GatherQuest) {
+        final QuestProgressionResponse response = ((GatherQuest) quest).addIfValid(item);
+        this.checkQuestResponse(who, quest, response);
+      }
+    }
+  }
+
+  public void handleQuestEntityKill(final LivingEntity entity, final Player who) {
+    for (final Quest quest : this.activeQuests) {
+      if (quest instanceof KillQuest) {
+        final QuestProgressionResponse response = ((KillQuest) quest).addIfValid(entity);
+        this.checkQuestResponse(who, quest, response);
+        break;
+      }
+    }
+  }
+
+  private void checkQuestResponse(final Player who, final Quest quest, final QuestProgressionResponse response) {
+    if (response.isProgressShowCause()) {
+      quest.addProgressBarView(who);
+    }
+    if (response == QuestProgressionResponse.COMPLETE) {
+      this.broadcastQuestCompletion(quest);
+      this.questPoints += quest.getRewardPoints();
+      TaskManager.getInstance().runBukkitSync(() -> this.activeQuests.remove(quest));
+    }
+  }
+
+  public Quest generateNewQuest() {
+    final Quest quest = new QuestGenerator().generateQuest(RaceType.fromName(this.getDisplayName()));
+    this.activeQuests.add(quest);
+    return quest;
   }
 
   public int getAmountOfRole(final RoleType roleType) {
@@ -181,6 +252,12 @@ public abstract class Race {
     builder.lore(this.getDescription());
     builder.lore("");
 
+    builder.lore("§eKlassen: ");
+    for (final RoleType roleType : this.getChoosableRoles()) {
+      builder.lore("§f - §7" + roleType.getDisplayName() + " [" + this.getRolePercentage(roleType) + "%]");
+    }
+    builder.lore("");
+
     final int memberCount = this.getMemberCount();
     final int diff = memberCount - RaceType.getLowestMemberCount();
 
@@ -201,6 +278,12 @@ public abstract class Race {
     builder.lore(sub);
 
     return builder.build();
+  }
+
+  public double getRolePercentage(final RoleType roleType) {
+    final int current = this.getAmountOfRole(roleType);
+    final int sum = this.getTotalRolesChosen();
+    return sum == 0 ? 0.0 : ((int) (1000.0 / sum * current)) / 10.0;
   }
 
   public boolean isCrowned(final Player player) {
@@ -336,5 +419,7 @@ public abstract class Race {
   public abstract List<CustomShapedRecipe> listRaceRecipes();
 
   public abstract List<RoleType> getChoosableRoles();
+
+  public abstract void playThemeSound(Player player);
 
 }

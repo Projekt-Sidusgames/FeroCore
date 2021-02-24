@@ -7,6 +7,7 @@ import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.Msg;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
 import com.google.common.collect.ImmutableList;
@@ -257,5 +258,10 @@ public class DwarfRace extends Race {
   @Override
   public List<RoleType> getChoosableRoles() {
     return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.AXE_FIGHTER, RoleType.ALCHEMIST);
+  }
+
+  @Override
+  public void playThemeSound(final Player player) {
+    CustomSound.DWARF_THEME.play(player);
   }
 }

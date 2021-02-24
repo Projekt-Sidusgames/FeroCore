@@ -18,17 +18,17 @@ import org.bukkit.plugin.java.JavaPlugin;
  * permission of the owner.
  *
  */
-public class EvenDistributedRaceTicker implements Runnable {
+public class EvenDistributedPlayerTicker implements Runnable {
 
-  protected static EvenDistributedRaceTicker start(final JavaPlugin plugin) {
-    final EvenDistributedRaceTicker ticker = new EvenDistributedRaceTicker();
+  protected static EvenDistributedPlayerTicker start(final JavaPlugin plugin) {
+    final EvenDistributedPlayerTicker ticker = new EvenDistributedPlayerTicker();
     Bukkit.getScheduler().runTaskTimer(plugin, ticker, 1L, 1L);
     return ticker;
   }
 
   private static final int DISTRIBUTION = 20;
 
-  private EvenDistributedRaceTicker() {
+  private EvenDistributedPlayerTicker() {
     this.playerPositionMap = new HashMap<>();
     this.uuidMatrix = new ArrayList<>();
     for (int i = 0; i < DISTRIBUTION; i++) {
@@ -69,10 +69,13 @@ public class EvenDistributedRaceTicker implements Runnable {
   public void run() {
     for (final UUID uuid : this.uuidMatrix.get(this.currentPosition)) {
       final FeroPlayer fp = FeroPlayer.of(uuid);
+
       if (fp.hasChosenRace()) {
         fp.getRace().onSecond(Bukkit.getPlayer(uuid));
       }
       fp.getProtectionSession().tick();
+      fp.checkTemporaryBossBars();
+      fp.updateAndShowActionBar();
     }
     this.proceedPosition();
   }

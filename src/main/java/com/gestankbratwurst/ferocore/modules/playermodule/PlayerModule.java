@@ -60,7 +60,8 @@ public class PlayerModule implements BaseModule, Flushable {
       this.addFeroPlayer(this.feroIO.loadFeroPlayer(playerID));
     }
     final FeroPlayer feroPlayer = this.getFeroPlayer(player.getUniqueId());
-    TaskManager.getInstance().runBukkitAsync(() -> feroPlayer.setLastSeenGameProfile(UtilPlayer.getGameProfile(player)));
+    TaskManager.getInstance().runBukkitSyncDelayed(feroPlayer::reapplyActionDisplay, 10L);
+    TaskManager.getInstance().runBukkitSync(() -> feroPlayer.setLastSeenGameProfile(UtilPlayer.getGameProfile(player)));
   }
 
   private void addFeroPlayer(final FeroPlayer feroPlayer) {

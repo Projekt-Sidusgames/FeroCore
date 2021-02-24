@@ -23,8 +23,6 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -71,18 +69,12 @@ public class OrcHornItemHandle implements CustomItemHandle {
 
   @Override
   public void handleInteracting(final PlayerInteractEvent event, final ItemStack item) {
-    final ItemMeta meta = item.getItemMeta();
-    final PersistentDataContainer container = meta.getPersistentDataContainer();
-    final Long nextRefresh = container.get(this.HORN_CD_KEY, PersistentDataType.LONG);
-    final long now = System.currentTimeMillis();
-    if (nextRefresh == null) {
-      container.set(this.HORN_CD_KEY, PersistentDataType.LONG, now + 1000 * this.cooldownInSeconds);
-    } else if (nextRefresh - now > 0) {
+    final FeroPlayer feroPlayer = FeroPlayer.of(event.getPlayer());
+    if (feroPlayer.hasTag("ORC_HORN_BLOWN")) {
       return;
     }
-    container.set(this.HORN_CD_KEY, PersistentDataType.LONG, now + 1000 * this.cooldownInSeconds);
-    item.setItemMeta(meta);
-    this.playHorn(event.getPlayer().getLocation());
+    feroPlayer.addTempTag("ORC_HORN_BLOWN", 1300);
+    this.playHornEffect(event.getPlayer().getLocation());
   }
 
   @Override
@@ -90,7 +82,7 @@ public class OrcHornItemHandle implements CustomItemHandle {
 
   }
 
-  private void playHorn(final Location location) {
+  private void playHornEffect(final Location location) {
     CustomSound.ORC_HORN.playAt(location, SoundCategory.HOSTILE, 2F, 1F);
     for (final LivingEntity living : location.getNearbyLivingEntities(16, 8, liv -> liv.getType() != EntityType.ARMOR_STAND)) {
       if (living instanceof Player) {

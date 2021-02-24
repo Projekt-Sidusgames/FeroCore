@@ -7,6 +7,7 @@ import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -211,5 +212,10 @@ public class HumanRace extends Race {
   @Override
   public List<RoleType> getChoosableRoles() {
     return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.BOW_FIGHTER, RoleType.AXE_FIGHTER, RoleType.ALCHEMIST);
+  }
+
+  @Override
+  public void playThemeSound(final Player player) {
+    CustomSound.HUMAN_THEME.play(player);
   }
 }

@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 /*******************************************************
  * Copyright (C) Gestankbratwurst suotokka@gmail.com
@@ -38,6 +39,13 @@ public class PlayerDataListener implements Listener {
   public void onLogin(final PlayerLoginEvent event) {
     final Player player = event.getPlayer();
     this.playerModule.initPlayer(player);
+  }
+
+  @EventHandler
+  public void onQuit(final PlayerQuitEvent event) {
+    final FeroPlayer feroPlayer = this.playerModule.getFeroPlayer(event.getPlayer().getUniqueId());
+    feroPlayer.clearFromTemporaryBossBars();
+
   }
 
 }

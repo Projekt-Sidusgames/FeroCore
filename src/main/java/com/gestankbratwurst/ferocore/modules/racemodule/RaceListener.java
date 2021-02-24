@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent.SlotType;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.util.Msg;
+import com.gestankbratwurst.ferocore.util.common.NameSpaceFactory;
 import com.gestankbratwurst.ferocore.util.common.UtilBlock;
 import com.gestankbratwurst.ferocore.util.tasks.TaskManager;
 import java.util.Optional;
@@ -11,10 +12,12 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -24,6 +27,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -34,6 +40,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
 
 /*******************************************************
@@ -48,7 +56,49 @@ import org.bukkit.projectiles.ProjectileSource;
 @RequiredArgsConstructor
 public class RaceListener implements Listener {
 
-  private final EvenDistributedRaceTicker raceTicker;
+  private final EvenDistributedPlayerTicker raceTicker;
+  private final NamespacedKey dropValidationKey = NameSpaceFactory.provide("VALID_DROP");
+
+  @EventHandler
+  public void onEntityDrop(final EntityDropItemEvent event) {
+    final PersistentDataContainer container = event.getItemDrop().getPersistentDataContainer();
+    container.set(this.dropValidationKey, PersistentDataType.INTEGER, 0);
+  }
+
+  @EventHandler
+  public void onPickup(final EntityPickupItemEvent event) {
+    final LivingEntity entity = event.getEntity();
+    if (!(entity instanceof Player)) {
+      return;
+    }
+    final FeroPlayer feroPlayer = FeroPlayer.of(entity.getUniqueId());
+    if (!feroPlayer.hasChosenRace()) {
+      return;
+    }
+
+    final PersistentDataContainer container = event.getItem().getPersistentDataContainer();
+    if (!container.has(this.dropValidationKey, PersistentDataType.INTEGER)) {
+      return;
+    }
+    feroPlayer.getRace().handleQuestItemPickup(event.getItem(), (Player) entity);
+  }
+
+  @EventHandler
+  public void onKill(final EntityDeathEvent event) {
+    final LivingEntity entity = event.getEntity();
+    if (entity instanceof Player) {
+      return;
+    }
+    final Player killer = entity.getKiller();
+    if (killer == null) {
+      return;
+    }
+    final FeroPlayer feroPlayer = FeroPlayer.of(killer);
+    if (!feroPlayer.hasChosenRace()) {
+      return;
+    }
+    feroPlayer.getRace().handleQuestEntityKill(entity, killer);
+  }
 
   @EventHandler
   public void onJoin(final PlayerJoinEvent event) {
@@ -159,7 +209,11 @@ public class RaceListener implements Listener {
   @EventHandler
   public void onBlockDrop(final BlockDropItemEvent event) {
     final FeroPlayer feroPlayer = FeroPlayer.of(event.getPlayer());
-    if (feroPlayer.hasChosenRace()) {
+    if (feroPlayer.hasChosenRace() && !UtilBlock.isPlayerPlaced(event.getBlock())) {
+      event.getItems().forEach(drop -> {
+        final PersistentDataContainer container = drop.getPersistentDataContainer();
+        container.set(this.dropValidationKey, PersistentDataType.INTEGER, 0);
+      });
       feroPlayer.getRace().onBlockDrop(event);
     }
   }

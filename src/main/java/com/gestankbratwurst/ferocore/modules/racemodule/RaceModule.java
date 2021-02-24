@@ -20,11 +20,20 @@ import com.gestankbratwurst.ferocore.modules.racemodule.items.orc.OrcHornItemHan
 import com.gestankbratwurst.ferocore.modules.racemodule.items.orc.OrcHornRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.undead.UndeadTotemHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.undead.UndeadTotemRecipe;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.GatherQuestObjective;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.KillQuestObjective;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.Quest;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.json.GatherQuestObjectSerializer;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.json.KillQuestObjectiveSerializer;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.json.MutableIntSerializer;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.json.QuestSerializer;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
+import com.gestankbratwurst.ferocore.util.json.GsonProvider;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -47,7 +56,7 @@ public class RaceModule implements BaseModule {
     toRace.addWarEnemy(from);
     final String top = fromRace.getIcon().getChar() + "    " + Model.WAR_ICON.getChar() + "    " + toRace.getIcon().getChar();
     final String bottom = "Ein Krieg wurde ausgerufen: §e" + fromRace.getDisplayName() + " §cgegen§e " + toRace.getDisplayName();
-    Bukkit.getOnlinePlayers().forEach(online -> {
+    UtilPlayer.forEachOnlineDistributed(15, (online) -> {
       online.sendTitle(top, bottom, 30, 45, 35);
       CustomSound.WAR_HORN.play(online);
     });
@@ -58,10 +67,10 @@ public class RaceModule implements BaseModule {
     final Race toRace = to.getRace();
     toRace.addPeaceRequestFrom(from);
     final String msg = "§aEs gab ein Friedensangebot: §e" + fromRace.getDisplayName() + " §aan §e" + toRace.getDisplayName();
-    for (final Player player : Bukkit.getOnlinePlayers()) {
-      UtilPlayer.playSound(player, Sound.BLOCK_NOTE_BLOCK_BELL);
-      player.sendMessage(msg);
-    }
+    UtilPlayer.forEachOnlineDistributed(15, (online) -> {
+      UtilPlayer.playSound(online, Sound.BLOCK_NOTE_BLOCK_BELL);
+      online.sendMessage(msg);
+    });
   }
 
   public void declineRequest(final RaceType from, final RaceType to) {
@@ -96,6 +105,11 @@ public class RaceModule implements BaseModule {
 
   @Override
   public void enable(final FeroCore plugin) {
+    GsonProvider.register(Quest.class, new QuestSerializer());
+    GsonProvider.register(KillQuestObjective.class, new KillQuestObjectiveSerializer());
+    GsonProvider.register(GatherQuestObjective.class, new GatherQuestObjectSerializer());
+    GsonProvider.register(MutableInt.class, new MutableIntSerializer());
+
     final FeroIO feroIO = plugin.getFeroIO();
     plugin.getPaperCommandManager()
         .getCommandCompletions()
@@ -107,7 +121,7 @@ public class RaceModule implements BaseModule {
     }
 
     plugin.getPaperCommandManager().registerCommand(new RaceCommand(this));
-    FeroCore.registerListener(new RaceListener(EvenDistributedRaceTicker.start(plugin)));
+    FeroCore.registerListener(new RaceListener(EvenDistributedPlayerTicker.start(plugin)));
 
     final CustomItemManager customItemManager = FeroCore.getModule(CustomItemModule.class).getCustomItemManager();
     customItemManager.registerHandle(new DwarfCanonHandle());

@@ -246,7 +246,7 @@ public class UtilBlock implements Listener {
     if (positionSet == null) {
       return;
     }
-    positionSet.remove(new BlockPosition(block));
+    TaskManager.getInstance().runBukkitSync(() -> positionSet.remove(new BlockPosition(block)));
   }
 
   @EventHandler(priority = EventPriority.LOWEST)

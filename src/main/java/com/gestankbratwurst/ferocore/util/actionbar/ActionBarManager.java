@@ -20,6 +20,10 @@ import org.bukkit.entity.Player;
  */
 public class ActionBarManager {
 
+  private final Object2ObjectOpenHashMap<UUID, ActionBarBoard> boardMap;
+  @Getter(AccessLevel.PROTECTED)
+  private final TaskManager taskManager;
+
   public ActionBarManager(final FeroCore plugin) {
     this.boardMap = new Object2ObjectOpenHashMap<>();
     this.taskManager = TaskManager.getInstance();
@@ -27,14 +31,14 @@ public class ActionBarManager {
       this.init(player);
     }
     Bukkit.getPluginManager().registerEvents(new ActionBarListener(this), plugin);
-    this.taskManager
+    // TODO enable again for auto updates
+    /*
+        this.taskManager
         .runRepeatedBukkit(new ActionBarUpdateThread(this), 0L,
             ActionBarUpdateThread.UPDATE_PERIOD);
-  }
+     */
 
-  private final Object2ObjectOpenHashMap<UUID, ActionBarBoard> boardMap;
-  @Getter(AccessLevel.PROTECTED)
-  private final TaskManager taskManager;
+  }
 
   public ActionBarBoard getBoard(final UUID playerID) {
     return this.boardMap.get(playerID);
@@ -75,7 +79,7 @@ public class ActionBarManager {
   }
 
   public void update(final Player player) {
-    this.boardMap.get(player).update();
+    this.boardMap.get(player.getUniqueId()).update();
   }
 
   protected void updateAll() {

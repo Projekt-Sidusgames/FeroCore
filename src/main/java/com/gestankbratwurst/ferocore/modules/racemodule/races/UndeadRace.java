@@ -7,6 +7,7 @@ import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
@@ -194,5 +195,10 @@ public class UndeadRace extends Race {
   @Override
   public List<RoleType> getChoosableRoles() {
     return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.BOW_FIGHTER, RoleType.SPEAR_FIGHTER, RoleType.SHAMAN);
+  }
+
+  @Override
+  public void playThemeSound(final Player player) {
+    CustomSound.UNDEAD_THEME.play(player);
   }
 }

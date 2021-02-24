@@ -34,7 +34,8 @@ public class DebugCommand extends BaseCommand {
   }
 
   @Subcommand("customsound")
-  public void onCustomSound(final Player sender, final CustomSound sound) {
+  @CommandCompletion("@CustomSounds")
+  public void onCustomSound(final Player sender, @Values("@CustomSounds") final CustomSound sound) {
     sound.play(sender);
     Msg.send(sender, "Debug", "Spiele custom Sound: " + Msg.elem(sound.toString()));
   }

@@ -3,6 +3,7 @@ package com.gestankbratwurst.ferocore.util;
 import com.gestankbratwurst.ferocore.FeroCore;
 import com.gestankbratwurst.ferocore.modules.BaseModule;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.actionbar.ActionBarManager;
 import com.gestankbratwurst.ferocore.util.common.BukkitTime;
 import com.gestankbratwurst.ferocore.util.common.ChatInput;
@@ -61,6 +62,8 @@ public class UtilModule implements BaseModule {
     plugin.getPaperCommandManager().getCommandCompletions()
         .registerStaticCompletion("Skins",
             Arrays.stream(Model.values()).filter(Model::isHeadSkinEnabled).map(Enum::toString).collect(Collectors.toList()));
+    plugin.getPaperCommandManager().getCommandCompletions()
+        .registerStaticCompletion("CustomSounds", Arrays.stream(CustomSound.values()).map(Enum::toString).collect(Collectors.toList()));
 
     GsonProvider.register(ItemStack.class, new ItemStackSerializer());
     GsonProvider.register(CraftItemStack.class, new ItemStackSerializer());

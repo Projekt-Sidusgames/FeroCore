@@ -36,8 +36,6 @@ public final class FeroCore extends JavaPlugin {
   private PaperCommandManager paperCommandManager;
   @Getter
   private ProtocolManager protocolManager;
-  @Getter
-  private UtilModule utilModule;
 
   public static <T extends BaseModule> T getModule(final Class<T> clazz) {
     return (T) instance.modules.get(clazz);

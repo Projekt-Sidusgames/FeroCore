@@ -8,6 +8,7 @@ import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
+import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.common.NameSpaceFactory;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -243,5 +244,10 @@ public class OrcRace extends Race {
   @Override
   public List<RoleType> getChoosableRoles() {
     return Arrays.asList(RoleType.SWORD_FIGHTER, RoleType.AXE_FIGHTER, RoleType.BOW_FIGHTER, RoleType.SHAMAN);
+  }
+
+  @Override
+  public void playThemeSound(final Player player) {
+    CustomSound.ORC_THEME.play(player);
   }
 }

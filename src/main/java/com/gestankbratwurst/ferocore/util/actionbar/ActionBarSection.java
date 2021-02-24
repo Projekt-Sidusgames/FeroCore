@@ -19,10 +19,10 @@ import lombok.Getter;
 public class ActionBarSection {
 
   protected ActionBarSection(final ActionBarManager actionBarManager) {
-    sectionLines = Queues.newPriorityQueue();
-    sectionLines.add(ActionLine.empty());
+    this.sectionLines = Queues.newPriorityQueue();
+    this.sectionLines.add(ActionLine.empty());
     this.actionBarManager = actionBarManager;
-    tokenLines = new Object2ObjectOpenHashMap<>();
+    this.tokenLines = new Object2ObjectOpenHashMap<>();
   }
 
   @Getter
@@ -32,61 +32,69 @@ public class ActionBarSection {
 
   public ActionLine addLayer(final int priority, final Supplier<String> lineSupplier) {
     final ActionLine line = new ActionLine(priority, lineSupplier);
-    addLayer(line);
+    this.addLayer(line);
     return line;
   }
 
   public void removeLayer(final ActionLine line) {
-    sectionLines.remove(line);
+    this.sectionLines.remove(line);
+  }
+
+  public void removeToken(final String key) {
+    final ActionLine line = this.tokenLines.get(key);
+    if (line != null) {
+      this.removeLayer(line);
+      this.tokenLines.remove(key);
+    }
   }
 
   private void removeToken(final String key, final ActionLine line) {
-    if (tokenLines.get(key) == line) {
-      removeLayer(line);
-      tokenLines.remove(key);
+    if (this.tokenLines.get(key) == line) {
+      this.removeLayer(line);
+      this.tokenLines.remove(key);
     }
   }
 
   public void addTempLayer(final long lifeTicks, final ActionLine line) {
-    sectionLines.add(line);
-    actionBarManager.getTaskManager().runBukkitSyncDelayed(() -> {
-      removeLayer(line);
-    }, lifeTicks);
+    this.sectionLines.add(line);
+    this.actionBarManager.getTaskManager().runBukkitSyncDelayed(() -> this.removeLayer(line), lifeTicks);
   }
 
-  public void addTokenLayer(final long lifeTicks, final String key, final ActionLine line) {
-    if (tokenLines.containsKey(key)) {
-      sectionLines.remove(tokenLines.get(key));
-      tokenLines.put(key, line);
+  public void setTokenLayer(final String key, final ActionLine line) {
+    if (this.tokenLines.containsKey(key)) {
+      this.sectionLines.remove(this.tokenLines.get(key));
     }
-    sectionLines.add(line);
-    actionBarManager.getTaskManager().runBukkitSyncDelayed(() -> {
-      removeToken(key, line);
-    }, lifeTicks);
+    this.tokenLines.put(key, line);
+    this.sectionLines.add(line);
   }
 
-  public ActionLine addTokenLayer(final long lifeTicks, final String key, final int priority, final Supplier<String> lineSupplier) {
+  public void addTempTokenLayer(final long lifeTicks, final String key, final ActionLine line) {
+    this.setTokenLayer(key, line);
+    this.actionBarManager.getTaskManager().runBukkitSyncDelayed(() -> this.removeToken(key, line), lifeTicks);
+  }
+
+  public ActionLine setTokenLayer(final long lifeTicks, final String key, final int priority, final Supplier<String> lineSupplier) {
     final ActionLine line = new ActionLine(priority, lineSupplier);
-    addTempLayer(lifeTicks, line);
+    this.addTempLayer(lifeTicks, line);
     return line;
   }
 
   public ActionLine addTempLayer(final long lifeTicks, final int priority, final Supplier<String> lineSupplier) {
     final ActionLine line = new ActionLine(priority, lineSupplier);
-    addTempLayer(lifeTicks, line);
+    this.addTempLayer(lifeTicks, line);
     return line;
   }
 
   public void addLayer(final ActionLine line) {
-    sectionLines.add(line);
+    this.sectionLines.add(line);
   }
 
   public int getHighestPriority() {
-    return sectionLines.peek().getPriority();
+    return this.sectionLines.peek().getPriority();
   }
 
   public ActionLine getMostSignificant() {
-    return sectionLines.peek();
+    return this.sectionLines.peek();
   }
 
 }

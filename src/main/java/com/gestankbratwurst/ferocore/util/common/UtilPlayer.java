@@ -1,6 +1,8 @@
 package com.gestankbratwurst.ferocore.util.common;
 
 import com.destroystokyo.paper.profile.CraftPlayerProfile;
+import com.gestankbratwurst.ferocore.util.LimitedProceedingBukkitRunnable;
+import com.gestankbratwurst.ferocore.util.Proceedable;
 import com.gestankbratwurst.ferocore.util.common.sub.ChannelingCancel;
 import com.gestankbratwurst.ferocore.util.common.sub.ChannelingCancel.ChannelCancelType;
 import com.gestankbratwurst.ferocore.util.common.sub.WaitingPlayer;
@@ -10,7 +12,12 @@ import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import java.util.ArrayDeque;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.bukkit.Bukkit;
@@ -50,6 +57,41 @@ public class UtilPlayer implements Listener, Runnable {
   private static final Vector UP_VEC = new Vector(0, 1, 0);
   private static final Vector DOWN_VEC = new Vector(0, -1, 0);
   private static final Object2ObjectMap<Player, WaitingPlayer> WAITING_PLAYERS = new Object2ObjectOpenHashMap<>();
+
+  public static void forEachOnlineDistributed(final int actionsPerTick, final Consumer<Player> action) {
+    final ProcessableOnlinePlayerAction processable = new ProcessableOnlinePlayerAction(Bukkit.getOnlinePlayers(), actionsPerTick, action);
+    final List<Proceedable> singleActionList = Collections.singletonList(processable);
+    final LimitedProceedingBukkitRunnable runnable = new LimitedProceedingBukkitRunnable(singleActionList);
+    TaskManager.getInstance().runRepeatedBukkit(runnable, 0L, 1L);
+  }
+
+  private static class ProcessableOnlinePlayerAction implements Proceedable {
+
+    private final Queue<Player> hardReferenceQueue;
+    private final Consumer<Player> action;
+    private final int actionsPerTick;
+
+    public ProcessableOnlinePlayerAction(final Collection<? extends Player> players, final int apt, final Consumer<Player> action) {
+      this.hardReferenceQueue = new ArrayDeque<>(players);
+      this.actionsPerTick = apt;
+      this.action = action;
+    }
+
+    @Override
+    public boolean proceed() {
+      for (int i = 0; i < this.actionsPerTick; i++) {
+        final Player next = this.hardReferenceQueue.poll();
+        if (next == null) {
+          break;
+        }
+        if (next.isOnline()) {
+          this.action.accept(next);
+        }
+      }
+      return this.hardReferenceQueue.isEmpty();
+    }
+
+  }
 
   public static void init(final JavaPlugin host) {
     Preconditions.checkArgument(!UtilPlayer.initialized, "UtilPlayer is already initialized!");

@@ -27,6 +27,11 @@ public enum CustomSound {
   ORC_HORN(),
   ORC_CRY(),
   HEART_BEAT_10S(),
+  UNDEAD_THEME(),
+  ORC_THEME(),
+  ELF_THEME(),
+  HUMAN_THEME(),
+  DWARF_THEME(),
   WAR_HORN();
 
   private MinecraftKey key = null;

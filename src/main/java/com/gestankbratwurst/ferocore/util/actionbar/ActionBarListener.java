@@ -24,12 +24,12 @@ public class ActionBarListener implements Listener {
 
   @EventHandler
   public void onJoin(final PlayerJoinEvent event) {
-    actionBarManager.init(event.getPlayer());
+    this.actionBarManager.init(event.getPlayer());
   }
 
   @EventHandler
   public void onQuit(final PlayerQuitEvent event) {
-    actionBarManager.terminate(event.getPlayer());
+    this.actionBarManager.terminate(event.getPlayer());
   }
 
 }

@@ -3,6 +3,7 @@ package com.gestankbratwurst.ferocore.modules.racemodule;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.util.Msg;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
+import lombok.RequiredArgsConstructor;
 import net.crytec.inventoryapi.SmartInventory;
 import net.crytec.inventoryapi.api.ClickableItem;
 import net.crytec.inventoryapi.api.InventoryContent;
@@ -20,11 +21,19 @@ import org.bukkit.entity.Player;
  * permission of the owner.
  *
  */
+@RequiredArgsConstructor
 public class RaceChooserGUI implements InventoryProvider {
 
-  public static void open(final Player player) {
-    SmartInventory.builder().size(3).title("Wähle eine Rasse").provider(new RaceChooserGUI()).build().open(player);
+  public static void open(final Player player, final boolean canChoose) {
+    final String title = canChoose ? "Wähle eine Rasse" : "Info über Rassen";
+    SmartInventory.builder().size(3).title(title).provider(new RaceChooserGUI(canChoose)).build().open(player);
   }
+
+  public static void open(final Player player) {
+    open(player, true);
+  }
+
+  private final boolean canChoose;
 
   @Override
   public void init(final Player player, final InventoryContent content) {
@@ -37,6 +46,9 @@ public class RaceChooserGUI implements InventoryProvider {
 
   private ClickableItem getRaceChooserIcon(final RaceType raceType) {
     return ClickableItem.of(raceType.getRace().getInfoIcon(), event -> {
+      if (!this.canChoose) {
+        return;
+      }
       final Player player = (Player) event.getWhoClicked();
       if (raceType.getRace().getMemberCount() - RaceType.getLowestMemberCount() >= 5) {
         Msg.send(player, "Rasse", "§cDiese Rasse ist übervölkert.");

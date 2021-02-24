@@ -6,9 +6,12 @@ import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Values;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.elf.ElfOrbHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.human.HolyBookHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.undead.UndeadTotemHandle;
+import com.gestankbratwurst.ferocore.modules.racemodule.quests.Quest;
+import com.gestankbratwurst.ferocore.util.Msg;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -32,6 +35,13 @@ public class RaceCommand extends BaseCommand {
   @Default
   public void onDefault(final Player player) {
     RaceMainGUI.open(player);
+  }
+
+  @Subcommand("info")
+  @CommandPermission("admin")
+  public void onInfo(final Player player) {
+    Msg.send(player, "Rassen", "Du öffnest das Info Menü.");
+    RaceChooserGUI.open(player, false);
   }
 
   @Subcommand("admin declare war")
@@ -88,6 +98,21 @@ public class RaceCommand extends BaseCommand {
   public void onHolyBook(final Player player) {
     final ItemStack item = HolyBookHandle.createBook();
     player.getInventory().addItem(item);
+  }
+
+  @Subcommand("admin genquest")
+  @CommandPermission("admin")
+  @CommandCompletion("@RaceType")
+  public void onGenQuest(final Player player, @Values("@RaceType") final RaceType target) {
+    final Quest quest = target.getRace().generateNewQuest();
+    Msg.send(player, "Rasse", "Es wurde eine neue Quest generiert: §f" + quest.getName() + " [" + quest.getRewardPoints() + "]");
+  }
+
+  @Subcommand("admin broadcastquest")
+  @CommandPermission("admin")
+  @CommandCompletion("@RaceType")
+  public void onBroadcastQuest(final Player player, @Values("@RaceType") final RaceType target, final int points) {
+    target.getRace().dummyQuestCompletion(points);
   }
 
 }

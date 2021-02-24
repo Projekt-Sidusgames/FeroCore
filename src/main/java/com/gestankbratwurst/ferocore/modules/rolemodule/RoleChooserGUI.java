@@ -3,6 +3,8 @@ package com.gestankbratwurst.ferocore.modules.rolemodule;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.racemodule.RaceMainGUI;
+import com.gestankbratwurst.ferocore.util.Msg;
+import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +15,7 @@ import net.crytec.inventoryapi.api.ClickableItem;
 import net.crytec.inventoryapi.api.InventoryContent;
 import net.crytec.inventoryapi.api.InventoryProvider;
 import net.crytec.inventoryapi.api.SlotPos;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -58,7 +61,13 @@ public class RoleChooserGUI implements InventoryProvider {
 
   private ClickableItem getRoleIcon(final RoleType roleType, final Player player) {
     final ItemStack icon = roleType.getIcon(player);
-    return ClickableItem.empty(icon);
+    return ClickableItem.of(icon, event -> {
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      FeroPlayer.of(player).changeRole(roleType);
+      player.closeInventory();
+      final String elem = Msg.elem(roleType.getDisplayName());
+      Msg.send(player, "Klassen", "Du hast die Klasse " + elem + " gewählt.");
+    });
   }
 
 }
