@@ -50,7 +50,7 @@ public class RecipeViewGUI implements InventoryProvider {
     return ClickableItem.of(icon, event -> {
       final Player player = (Player) event.getWhoClicked();
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
-      RaceRecipeSelectionGUI.open(player);
+      RecipeSelectionGUI.open(player);
     });
   }
 

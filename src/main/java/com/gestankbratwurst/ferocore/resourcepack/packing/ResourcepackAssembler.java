@@ -29,6 +29,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -396,12 +397,19 @@ public class ResourcepackAssembler {
       for (final Entry<String, JsonElement> entry : skinJson.entrySet()) {
         final Model model = Model.valueOf(entry.getKey());
         final int id = entry.getValue().getAsInt();
-        final ConsumingCallback callback = this.playerSkinManager.callback(model::setSkin);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final ConsumingCallback callback = this.playerSkinManager.callback(skin -> {
+          model.setSkin(skin);
+          latch.countDown();
+        });
         this.playerSkinManager.requestSkin(id, callback);
-        while (callback.locked) {
-          this.await(250);
+        try {
+          latch.await();
+        } catch (final InterruptedException e) {
+          e.printStackTrace();
         }
-        this.await(100);
         skinlessModels.remove(model);
       }
       isr.close();
@@ -412,27 +420,28 @@ public class ResourcepackAssembler {
         final File imageFile = model.getLinkedImageFile();
 
         Preconditions.checkState(imageFile != null);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+
         final ConsumingCallback callback = this.playerSkinManager.callback(skin -> {
           if (skin != null) {
-            skinWriteJson.addProperty(model.toString(), "" + skin.id);
-            System.out.println("Written Skin for " + model + ": " + skin.id);
             model.setSkin(skin);
           } else {
             this.plugin.getLogger().warning("Callback on skin is null!");
           }
-          System.out.println("Written model skin!");
         });
-        callback.locked = true;
+
         if (model.isPlayerSkinModel()) {
           this.playerSkinManager.uploadImage(imageFile, "AC_MODEL_" + model.toString(), callback);
         } else {
           this.playerSkinManager.uploadAndScaleHeadImage(imageFile, "AC_MODEL_" + model.toString(), callback);
         }
 
-        while (callback.locked) {
-          this.await(250);
+        try {
+          latch.await();
+        } catch (final InterruptedException e) {
+          e.printStackTrace();
         }
-        this.await(100);
       }
     } catch (final Exception exception) {
       exception.printStackTrace();

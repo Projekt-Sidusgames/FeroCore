@@ -5,14 +5,15 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.v1_16_R3.MojangsonParser;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
+import net.minecraft.server.v1_16_R3.TileEntityFurnace;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.libs.org.apache.commons.io.output.ByteArrayOutputStream;
@@ -54,9 +55,9 @@ public class UtilItem implements Listener {
 //    return 'X';
 //  }
 
-  private static final Map<String, ItemStack> nameHeadCache = new HashMap<>();
-  private static final Map<String, ItemStack> base64HeadCache = new HashMap<>();
-  private static final Map<UUID, ItemStack> gameProfileHeadCache = new HashMap<>();
+  private static final Map<String, ItemStack> nameHeadCache = new Object2ObjectOpenHashMap<>();
+  private static final Map<String, ItemStack> base64HeadCache = new Object2ObjectOpenHashMap<>();
+  private static final Map<UUID, ItemStack> gameProfileHeadCache = new Object2ObjectOpenHashMap<>();
 
   public static ItemStack getHeadFromGameProfile(final GameProfile gameProfile) {
     return UtilItem.gameProfileHeadCache.computeIfAbsent(gameProfile.getId(), pName -> UtilItem.produceHead(gameProfile)).clone();
@@ -75,6 +76,10 @@ public class UtilItem implements Listener {
     final GameProfile gameProfile = new GameProfile(UUID.randomUUID(), null);
     gameProfile.getProperties().put("textures", new Property("textures", base64Data));
     return gameProfile;
+  }
+
+  public static int getVanillaBurnDuration(final ItemStack itemStack) {
+    return TileEntityFurnace.getBurnDurations().get(CraftItemStack.asNMSCopy(itemStack).getItem());
   }
 
   public static String serialize(final ItemStack[] items) {
@@ -172,12 +177,12 @@ public class UtilItem implements Listener {
     final ItemStack newHead = new ItemStack(Material.PLAYER_HEAD);
     final SkullMeta headMeta = (SkullMeta) newHead.getItemMeta();
     final Field profileField;
-
+    
     try {
       profileField = headMeta.getClass().getDeclaredField("profile");
       profileField.setAccessible(true);
       profileField.set(headMeta, gameProfile);
-    } catch (final NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+    } catch (final ReflectiveOperationException e) {
       e.printStackTrace();
     }
 

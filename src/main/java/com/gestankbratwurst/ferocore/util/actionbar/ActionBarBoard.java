@@ -21,10 +21,10 @@ public class ActionBarBoard {
 
   protected ActionBarBoard(final UUID playerID, final ActionBarManager actionBarManager) {
     this.playerID = playerID;
-    sections = new ActionBarSection[3];
-    sections[0] = new ActionBarSection(actionBarManager);
-    sections[1] = new ActionBarSection(actionBarManager);
-    sections[2] = new ActionBarSection(actionBarManager);
+    this.sections = new ActionBarSection[3];
+    this.sections[0] = new ActionBarSection(actionBarManager);
+    this.sections[1] = new ActionBarSection(actionBarManager);
+    this.sections[2] = new ActionBarSection(actionBarManager);
   }
 
   private final UUID playerID;
@@ -34,25 +34,25 @@ public class ActionBarBoard {
   private String currentDisplay = "";
 
   public void update() {
-    final String left = sections[0].getMostSignificant().getLineSupplier().get();
-    String middle = sections[1].getMostSignificant().getLineSupplier().get();
-    final String right = sections[2].getMostSignificant().getLineSupplier().get();
-    final int pad = MIN_SECTION_LENGTH / 2;
+    final String left = this.sections[0].getMostSignificant().getLineSupplier().get();
+    String middle = this.sections[1].getMostSignificant().getLineSupplier().get();
+    final String right = this.sections[2].getMostSignificant().getLineSupplier().get();
+    final int pad = Math.max(1, (MIN_SECTION_LENGTH - middle.length()) / 2);
     if (left.isEmpty() && middle.isEmpty() && right.isEmpty()) {
-      currentDisplay = "";
+      this.currentDisplay = "";
     } else {
       middle = Strings.repeat(" ", pad) + middle + Strings.repeat(" ", pad);
-      currentDisplay = "§f" + left + "§7 | §f" + middle + "§7 | §f" + right;
+      this.currentDisplay = "§f" + left + "§7 | §f" + middle + "§7 | §f" + right;
     }
   }
 
   public ActionBarSection getSection(final Section section) {
-    return getSection(section.index);
+    return this.getSection(section.index);
   }
 
   public ActionBarSection getSection(final int index) {
     Preconditions.checkArgument(index < 3, "Index must be below 3.");
-    return sections[index];
+    return this.sections[index];
   }
 
   @AllArgsConstructor

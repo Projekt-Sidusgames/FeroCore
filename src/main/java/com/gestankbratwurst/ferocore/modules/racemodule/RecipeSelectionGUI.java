@@ -1,5 +1,8 @@
 package com.gestankbratwurst.ferocore.modules.racemodule;
 
+import com.gestankbratwurst.ferocore.FeroCore;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeManager;
+import com.gestankbratwurst.ferocore.modules.customrecipes.CustomRecipeModule;
 import com.gestankbratwurst.ferocore.modules.customrecipes.CustomShapedRecipe;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
@@ -24,24 +27,26 @@ import org.bukkit.inventory.ItemStack;
  *
  */
 @RequiredArgsConstructor
-public class RaceRecipeSelectionGUI implements InventoryProvider {
+public class RecipeSelectionGUI implements InventoryProvider {
 
   public static void open(final Player player) {
     final FeroPlayer feroPlayer = FeroPlayer.of(player);
     if (!feroPlayer.hasChosenRace()) {
       return;
     }
-    SmartInventory.builder().title("Rassen Rezepte").size(5).provider(new RaceRecipeSelectionGUI(feroPlayer.getRace())).build()
+    SmartInventory.builder().title("Deine Rezepte").size(5).provider(new RecipeSelectionGUI()).build()
         .open(player);
   }
 
-  private final Race race;
+  private final CustomRecipeManager customRecipeManager = FeroCore.getModule(CustomRecipeModule.class).getCustomRecipeManager();
 
   @Override
   public void init(final Player player, final InventoryContent content) {
     content.set(SlotPos.of(4, 0), RaceMainGUI.getBackToMainIcon());
-    for (final CustomShapedRecipe recipe : this.race.listRaceRecipes()) {
-      content.add(this.getRecipeIcon(recipe));
+    for (final CustomShapedRecipe recipe : this.customRecipeManager.getShapedRecipes()) {
+      if (recipe.canPotentiallyCraft(player)) {
+        content.add(this.getRecipeIcon(recipe));
+      }
     }
   }
 

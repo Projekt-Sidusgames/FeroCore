@@ -28,6 +28,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class FeroCore extends JavaPlugin {
 
+  private static boolean CLEAN_INIT = false;
+
   private static FeroCore instance;
   private final Map<Class<? extends BaseModule>, BaseModule> modules = new LinkedHashMap<>();
   @Getter
@@ -58,12 +60,25 @@ public final class FeroCore extends JavaPlugin {
     this.modules.put(RaceModule.class, new RaceModule());
     this.modules.put(RoleModule.class, new RoleModule());
     this.modules.put(PlayerModule.class, new PlayerModule());
-    this.enableModules();
+    try {
+      this.enableModules();
+    } catch (final Exception exception) {
+      exception.printStackTrace();
+      CLEAN_INIT = false;
+      this.getServer().shutdown();
+      this.getLogger().severe("Stopping server because initialisation was not clean.");
+      return;
+    }
+    CLEAN_INIT = true;
   }
 
   @Override
   public void onDisable() {
-    this.disableModules();
+    if (CLEAN_INIT) {
+      this.disableModules();
+    } else {
+      this.getLogger().severe("Not saving any data to disk.");
+    }
   }
 
 

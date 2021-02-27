@@ -20,6 +20,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
+import net.minecraft.server.v1_16_R3.ChatMessage;
+import net.minecraft.server.v1_16_R3.Container;
+import net.minecraft.server.v1_16_R3.Containers;
+import net.minecraft.server.v1_16_R3.EntityPlayer;
+import net.minecraft.server.v1_16_R3.PacketPlayOutOpenWindow;
 import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -28,6 +33,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -91,6 +97,13 @@ public class UtilPlayer implements Listener, Runnable {
       return this.hardReferenceQueue.isEmpty();
     }
 
+  }
+
+  public static void renameCurrentInv(final Player player, final String title, final Containers<?> containerType) {
+    final EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
+    final Container current = entityPlayer.activeContainer;
+    final PacketPlayOutOpenWindow packet = new PacketPlayOutOpenWindow(current.windowId, containerType, new ChatMessage(title));
+    entityPlayer.playerConnection.sendPacket(packet);
   }
 
   public static void init(final JavaPlugin host) {

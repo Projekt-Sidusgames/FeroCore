@@ -1,10 +1,8 @@
 package com.gestankbratwurst.ferocore.modules.racemodule.items.undead;
 
-import com.gestankbratwurst.ferocore.FeroCore;
 import com.gestankbratwurst.ferocore.modules.custommob.CustomMobModule;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.modules.racemodule.RaceType;
-import com.gestankbratwurst.ferocore.modules.skillmodule.SkillModule;
 import net.minecraft.server.v1_16_R3.DamageSource;
 import net.minecraft.server.v1_16_R3.EntityArmorStand;
 import net.minecraft.server.v1_16_R3.EntityTypes;
@@ -33,7 +31,6 @@ public class UndeadTotemEntity extends EntityArmorStand {
 
   private int maxTicksAlive;
   private final EntityTypes<? extends EntityArmorStand> type;
-  private final SkillModule skillModule = FeroCore.getModule(SkillModule.class);
 
   public UndeadTotemEntity(final EntityTypes<EntityArmorStand> type, final World world) {
     super(EntityTypes.ARMOR_STAND, world);
@@ -93,7 +90,7 @@ public class UndeadTotemEntity extends EntityArmorStand {
     final Location startLoc = location.clone().add(0, 3, 0);
     final Vector direction = minEnt.getLocation().toVector().subtract(startLoc.toVector());
     startLoc.setDirection(direction);
-    this.skillModule.addTickableSkill(new BlackWaveSkillshot(startLoc));
+    new BlackWaveSkillshot(startLoc).start();
   }
 
   @Override

@@ -34,6 +34,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
@@ -55,6 +57,7 @@ public class UtilMobs implements Listener {
       .expireAfterWrite(1, TimeUnit.MINUTES)
       .build();
 
+  
   public static Entity getEntity(final int id, final World world) {
     final net.minecraft.server.v1_16_R3.Entity nmsEntity = ((CraftWorld) world).getHandle().getEntity(id);
     if (nmsEntity != null) {
@@ -76,6 +79,15 @@ public class UtilMobs implements Listener {
     final NBTTagCompound compound = new NBTTagCompound();
     nmsEntity.a_(compound);
     return compound.toString();
+  }
+
+  public static void trueDamage(final LivingEntity entity, final DamageCause damageCause, final double damage) {
+    final EntityDamageEvent event = new EntityDamageEvent(entity, damageCause, damage);
+    if (event.callEvent()) {
+      final double current = entity.getHealth();
+      final double newHealth = current - damage;
+      entity.setHealth(Math.max(0, newHealth));
+    }
   }
 
   public Optional<StructurePiece> isInsideStructure(final LivingEntity entity, final StructureGenerator<?> nmsType) {

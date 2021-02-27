@@ -19,7 +19,12 @@ public class ChosenActionDisplay {
   private final PlayerActionPosition actionPosition;
 
   public void apply(final Player player) {
+    if (this.actionBarType == null) {
+      this.actionPosition.apply(player, null);
+      return;
+    }
     this.actionPosition.apply(player, this.actionBarType.produceLine(player));
   }
+
 
 }

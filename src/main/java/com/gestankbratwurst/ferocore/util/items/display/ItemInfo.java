@@ -16,41 +16,45 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class ItemInfo {
 
-  public ItemInfo(ItemStack inputItem) {
+  public ItemInfo(final ItemStack inputItem) {
     this.inputClone = inputItem.clone();
-    meta = inputClone.getItemMeta();
-    if (meta.hasDisplayName()) {
-      this.displayName = meta.getDisplayName();
-    }else{
+    this.meta = this.inputClone.getItemMeta();
+    if (this.meta.hasDisplayName()) {
+      this.displayName = this.meta.getDisplayName();
+    } else {
       this.displayName = "NO_NAME";
     }
-    this.lores = Lists.newArrayList();
+    if (this.meta.hasLore()) {
+      this.lores = this.meta.getLore();
+    } else {
+      this.lores = Lists.newArrayList();
+    }
   }
 
   private final ItemStack inputClone;
   private final ItemMeta meta;
   private String displayName;
-  private List<String> lores;
+  private final List<String> lores;
 
-  public void setLore(List<String> lines) {
+  public void setLore(final List<String> lines) {
     this.lores.clear();
-    for (String line : lines) {
+    for (final String line : lines) {
       this.lores.add(line);
     }
   }
 
-  public void setLore(String... lines) {
+  public void setLore(final String... lines) {
     this.lores.clear();
-    for (String line : lines) {
+    for (final String line : lines) {
       this.lores.add(line);
     }
   }
 
-  public void addLore(String loreLine) {
+  public void addLore(final String loreLine) {
     this.lores.add(loreLine);
   }
 
-  public void setName(String name) {
+  public void setName(final String name) {
     this.displayName = name;
   }
 

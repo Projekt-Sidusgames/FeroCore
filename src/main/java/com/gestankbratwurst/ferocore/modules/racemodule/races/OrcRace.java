@@ -10,6 +10,7 @@ import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.common.NameSpaceFactory;
+import com.gestankbratwurst.ferocore.util.common.UtilMobs;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -116,7 +118,7 @@ public class OrcRace extends Race {
       final boolean extra = FeroPlayer.of(event.getDamager().getUniqueId()).hasTag("ORC_HORN");
       final int extraDmg = extra ? 3 : 1;
       final LivingEntity livingEntity = (LivingEntity) entity;
-      livingEntity.setHealth(livingEntity.getHealth() - extraDmg);
+      UtilMobs.trueDamage(livingEntity, DamageCause.ENTITY_ATTACK, extraDmg);
       if (extra) {
         livingEntity.getWorld()
             .spawnParticle(Particle.REDSTONE, livingEntity.getLocation(), 6, 0.5, 1.5, 0.5, new DustOptions(Color.RED, 1F));

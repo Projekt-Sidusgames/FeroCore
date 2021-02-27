@@ -7,10 +7,12 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Values;
+import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.elf.ElfOrbHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.human.HolyBookHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.items.undead.UndeadTotemHandle;
 import com.gestankbratwurst.ferocore.modules.racemodule.quests.Quest;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.util.Msg;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.ChatColor;
@@ -113,6 +115,13 @@ public class RaceCommand extends BaseCommand {
   @CommandCompletion("@RaceType")
   public void onBroadcastQuest(final Player player, @Values("@RaceType") final RaceType target, final int points) {
     target.getRace().dummyQuestCompletion(points);
+  }
+
+  @Subcommand("admin changeclass")
+  @CommandPermission("admin")
+  public void onBroadcastQuest(final Player player, final RoleType target) {
+    FeroPlayer.of(player).changeRole(target);
+    Msg.send(player, "Klasse", "Wurde geändert.");
   }
 
 }

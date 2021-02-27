@@ -1,11 +1,6 @@
 package com.gestankbratwurst.ferocore.util.tasks;
 
-import com.google.common.collect.Queues;
-import java.util.ArrayDeque;
 import java.util.function.Consumer;
-import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.tuple.Pair;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /*******************************************************
@@ -19,26 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class BukkitSyncConsumer<T> implements Runnable {
 
-  private final ArrayDeque<Pair<ItemStack, Consumer<ItemStack>>> itemActions = Queues.newArrayDeque();
-
-  public void addAction(final ItemStack item, final Consumer<ItemStack> action) {
-    this.itemActions.add(Pair.of(item, action));
-  }
-
-  public void invokeOne() {
-    if (!this.itemActions.isEmpty()) {
-      final Pair<ItemStack, Consumer<ItemStack>> pair = this.itemActions.poll();
-      pair.getRight().accept(pair.getLeft());
-    }
-  }
-
-
-  public void addEnachntAction(final ItemStack item) {
-    this.addAction(item, itm -> {
-      item.addEnchantment(Enchantment.ARROW_DAMAGE, 2);
-    });
-  }
-
   public BukkitSyncConsumer(final T object, final Consumer<T> action, final JavaPlugin plugin) {
     this.plugin = plugin;
     this.sync = new ConsumingBukkitSync<>(object, action);
@@ -48,7 +23,6 @@ public class BukkitSyncConsumer<T> implements Runnable {
   private final ConsumingBukkitSync<T> sync;
 
   @Override
-
   public void run() {
     this.sync.runTask(this.plugin);
   }

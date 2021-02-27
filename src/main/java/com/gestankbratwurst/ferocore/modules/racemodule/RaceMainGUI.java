@@ -3,7 +3,9 @@ package com.gestankbratwurst.ferocore.modules.racemodule;
 import com.gestankbratwurst.ferocore.modules.playermodule.FeroPlayer;
 import com.gestankbratwurst.ferocore.modules.playermodule.PlayerOptionGUI;
 import com.gestankbratwurst.ferocore.modules.racemodule.quests.Quest;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleAttribute;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleChooserGUI;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleInfoGUI;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.resourcepack.sounds.CustomSound;
 import com.gestankbratwurst.ferocore.util.Msg;
@@ -116,8 +118,22 @@ public class RaceMainGUI implements InventoryProvider {
   }
 
   private ClickableItem getRoleStatsGUI(final Player player) {
-    final ItemStack icon = new ItemBuilder(Model.ROLE_ICON.getItem()).name("§c- TODO -").build();
-    return ClickableItem.of(icon, event -> {
+    final FeroPlayer feroPlayer = FeroPlayer.of(player);
+    final ItemBuilder icon = new ItemBuilder(Model.ROLE_ICON.getItem())
+        .name("§eKlassen Menü: " + feroPlayer.getChosenRoleTye().getDisplayName())
+        .lore(feroPlayer.getRoleLevelStringNumber())
+        .lore("")
+        .lore("§6Freie Attributspunkte: §f" + feroPlayer.getUnspentAttributePoints())
+        .lore("")
+        .lore("§6Attribute:");
+
+    for (final RoleAttribute attribute : RoleAttribute.values()) {
+      icon.lore("§f " + attribute.getDisplayName() + ": §7" + feroPlayer.getAttributeLevel(attribute));
+    }
+
+    return ClickableItem.of(icon.build(), event -> {
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      RoleInfoGUI.open(player);
     });
   }
 
@@ -143,7 +159,7 @@ public class RaceMainGUI implements InventoryProvider {
     return ClickableItem.of(icon, event -> {
       final Player player = (Player) event.getWhoClicked();
       UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
-      RaceRecipeSelectionGUI.open(player);
+      RecipeSelectionGUI.open(player);
     });
   }
 

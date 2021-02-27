@@ -34,6 +34,10 @@ public class RoleStatistics {
     this(null);
   }
 
+  public int getRoleAttributePointSum() {
+    return this.roleAttributes.values().stream().mapToInt(MutableInt::intValue).sum();
+  }
+
   public int getRoleAttribute(final RoleAttribute attribute) {
     return this.roleAttributes.get(attribute).intValue();
   }

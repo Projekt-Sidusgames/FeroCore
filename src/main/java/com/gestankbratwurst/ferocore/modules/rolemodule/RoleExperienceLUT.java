@@ -17,10 +17,10 @@ public class RoleExperienceLUT {
   private static final Int2LongMap LEVEL_TO_EXPERIENCE_TABLE = new Int2LongOpenHashMap();
 
   static {
-    for (int lvl = 2; lvl < 100; lvl++) {
+    for (int lvl = 1; lvl < 100; lvl++) {
       LEVEL_TO_EXPERIENCE_TABLE.put(lvl, 50 + (lvl - 1) * 150 + lvl * lvl * 12);
     }
-    LEVEL_TO_EXPERIENCE_TABLE.put(1, 0);
+    LEVEL_TO_EXPERIENCE_TABLE.put(0, 0);
   }
 
   public static long getTotalExperienceToLevel(final int level) {
@@ -33,7 +33,7 @@ public class RoleExperienceLUT {
 
   public static int getLevelOf(final long currentExperience) {
     for (int lvl = 1; lvl < LEVEL_TO_EXPERIENCE_TABLE.size(); lvl++) {
-      if (LEVEL_TO_EXPERIENCE_TABLE.get(lvl) > currentExperience) {
+      if (getTotalExperienceToLevel(lvl) > currentExperience) {
         return lvl - 1;
       }
     }

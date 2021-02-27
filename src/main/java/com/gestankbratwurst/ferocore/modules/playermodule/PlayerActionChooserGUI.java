@@ -3,6 +3,7 @@ package com.gestankbratwurst.ferocore.modules.playermodule;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.util.common.UtilPlayer;
 import com.gestankbratwurst.ferocore.util.items.ItemBuilder;
+import javax.swing.JFrame;
 import lombok.RequiredArgsConstructor;
 import net.crytec.inventoryapi.SmartInventory;
 import net.crytec.inventoryapi.api.ClickableItem;
@@ -41,7 +42,20 @@ public class PlayerActionChooserGUI implements InventoryProvider {
     for (final PlayerActionBarType actionType : PlayerActionBarType.values()) {
       content.add(this.getIconOfType(actionType));
     }
+
+    final JFrame frame = new JFrame();
     content.set(SlotPos.of(4, 0), this.getBackIcon());
+    content.set(SlotPos.of(4, 8), this.getRemoverIcon());
+  }
+
+  private ClickableItem getRemoverIcon() {
+    final ItemStack icon = new ItemBuilder(Model.RED_X.getItem()).name("§cKeine Anzeige").build();
+    return ClickableItem.of(icon, event -> {
+      final Player player = (Player) event.getWhoClicked();
+      UtilPlayer.playSound(player, Sound.UI_BUTTON_CLICK);
+      FeroPlayer.of(player).setChosenActionDisplay(this.actionPosition, null);
+      this.reopen(player);
+    });
   }
 
   private ClickableItem getIconOfType(final PlayerActionBarType type) {

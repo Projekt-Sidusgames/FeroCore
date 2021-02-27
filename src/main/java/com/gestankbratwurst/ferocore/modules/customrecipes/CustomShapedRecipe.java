@@ -31,7 +31,7 @@ public abstract class CustomShapedRecipe {
   @Getter
   private final ShapedRecipe handle;
 
-  public void setMultiIngredient(final char key, final Material... materials) {
+  public void setMaterialIngredients(final char key, final Material... materials) {
     final MaterialChoice choice = new MaterialChoice(Arrays.asList(materials));
     this.handle.setIngredient(key, choice);
   }
@@ -39,9 +39,9 @@ public abstract class CustomShapedRecipe {
   public void setIngredient(final char key, final ItemStack item, final boolean exact) {
     final RecipeChoice choice;
     if (exact) {
-      choice = new MaterialChoice(item.getType());
+      choice = new ExactChoice(item);
     } else {
-      choice = new ExactChoice(item.asOne());
+      choice = new MaterialChoice(item.getType());
     }
     this.handle.setIngredient(key, choice);
   }
@@ -57,13 +57,16 @@ public abstract class CustomShapedRecipe {
   public ItemStack[] getCraftingMatrix() {
     final ItemStack[] matrix = new ItemStack[9];
     final StringBuilder builder = new StringBuilder();
+    int size = 0;
     for (final String line : this.getHandle().getShape()) {
+      size++;
       String finalLine = line;
       if (line.length() != 3) {
-        finalLine = StringUtils.rightPad(" ", 3 - line.length());
+        finalLine = StringUtils.rightPad(line, 3);
       }
       builder.append(finalLine);
     }
+    builder.append("   ".repeat(Math.max(0, 3 - size)));
     final Map<Character, ItemStack> ingredientMap = this.getHandle().getIngredientMap();
     final String results = builder.toString();
     for (int i = 0; i < matrix.length; i++) {
@@ -76,6 +79,10 @@ public abstract class CustomShapedRecipe {
 
   public abstract void onCraft(Player player, int amount);
 
+
+  public boolean canPotentiallyCraft(final Player player) {
+    return this.canCraft(player);
+  }
   // TODO getShape
   // TODO getIngredients
 }

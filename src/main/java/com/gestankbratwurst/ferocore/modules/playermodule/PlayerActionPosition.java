@@ -4,6 +4,7 @@ import com.gestankbratwurst.ferocore.FeroCore;
 import com.gestankbratwurst.ferocore.resourcepack.skins.Model;
 import com.gestankbratwurst.ferocore.util.UtilModule;
 import com.gestankbratwurst.ferocore.util.actionbar.ActionBarBoard.Section;
+import com.gestankbratwurst.ferocore.util.actionbar.ActionBarManager;
 import com.gestankbratwurst.ferocore.util.actionbar.ActionLine;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,12 @@ public enum PlayerActionPosition {
   private final ItemStack baseIcon;
 
   public void apply(final Player player, final ActionLine actionLine) {
-    FeroCore.getModule(UtilModule.class).getActionBarManager().getBoard(player).getSection(this.section)
-        .setTokenLayer(this.display, actionLine);
+    final ActionBarManager actionBarManager = FeroCore.getModule(UtilModule.class).getActionBarManager();
+    if (actionLine == null) {
+      actionBarManager.getBoard(player).getSection(this.section).removeToken(this.display);
+      return;
+    }
+    actionBarManager.getBoard(player).getSection(this.section).setTokenLayer(this.display, actionLine);
   }
 
 }

@@ -5,6 +5,7 @@ import com.gestankbratwurst.ferocore.modules.protectionmodule.ProtectionSession;
 import com.gestankbratwurst.ferocore.modules.racemodule.Race;
 import com.gestankbratwurst.ferocore.modules.racemodule.RaceType;
 import com.gestankbratwurst.ferocore.modules.rolemodule.DisplayableExperience;
+import com.gestankbratwurst.ferocore.modules.rolemodule.RoleAttribute;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleStatistics;
 import com.gestankbratwurst.ferocore.modules.rolemodule.RoleType;
 import com.gestankbratwurst.ferocore.util.UtilModule;
@@ -91,16 +92,30 @@ public class FeroPlayer {
     this.chosenActionDisplays[position.getSection().getIndex()] = actionDisplay;
   }
 
+  public int getRoleLevel() {
+    return this.roleStatistics.hasSelectedRole() ? this.roleStatistics.getLevel() : -1;
+  }
+
   protected void reapplyActionDisplay() {
-    System.out.println("RE_TEST");
     this.getOnlinePlayer().ifPresent(online -> {
-      System.out.println("APPLY");
       for (final ChosenActionDisplay display : this.chosenActionDisplays) {
         if (display != null) {
           display.apply(online);
         }
       }
     });
+  }
+
+  public int getAttributeLevel(final RoleAttribute attribute) {
+    return this.roleStatistics.getRoleAttribute(attribute);
+  }
+
+  public int getTotalSpentAttributePoints() {
+    return this.roleStatistics.getRoleAttributePointSum();
+  }
+
+  public int getUnspentAttributePoints() {
+    return this.roleStatistics.getAttributePoints();
   }
 
   public void changeRole(final RoleType roleType) {

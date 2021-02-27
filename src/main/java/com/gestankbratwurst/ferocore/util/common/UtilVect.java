@@ -35,9 +35,9 @@ public class UtilVect {
   }
 
   public static void forEachBlock(final BoundingBox box, final World world, final Consumer<Block> blockConsumer) {
-    for (int x = (int) box.getMinX(); x <= (int) box.getMaxX(); x++) {
-      for (int y = (int) box.getMinY(); y <= (int) box.getMaxY(); y++) {
-        for (int z = (int) box.getMinZ(); z <= (int) box.getMaxZ(); z++) {
+    for (int x = (int) box.getMinX(); x <= (int) box.getMaxX() - 1; x++) {
+      for (int y = (int) box.getMinY(); y <= (int) box.getMaxY() - 1; y++) {
+        for (int z = (int) box.getMinZ(); z <= (int) box.getMaxZ() - 1; z++) {
           blockConsumer.accept(world.getBlockAt(x, y, z));
         }
       }

@@ -53,7 +53,7 @@ public class ItemDisplayCompiler extends PacketAdapter implements Function<ItemS
 
   @Override
   public void onPacketSending(final PacketEvent event) {
-    final PacketContainer packet = event.getPacket();
+    final PacketContainer packet = event.getPacket().deepClone();
     this.playerToModify = event.getPlayer();
     if (event.getPacketType() == Server.WINDOW_ITEMS) {
       final StructureModifier<ItemStack[]> structMod = packet.getItemArrayModifier();

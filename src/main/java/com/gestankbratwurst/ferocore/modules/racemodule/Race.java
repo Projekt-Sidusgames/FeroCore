@@ -321,8 +321,10 @@ public abstract class Race {
     return builder.build();
   }
 
-  public void onChat(final Player who, final String msg) {
-    final String out = this.getNameChatColor() + who.getName() + "§f [" + this.getIcon().getChar() + "] >> §7" + msg;
+  public void onChat(final FeroPlayer feroPlayer, final Player who, final String msg) {
+    final String roleIcon =
+        feroPlayer.hasChosenRole() ? " §f[" + feroPlayer.getChosenRoleTye().getChatIcon() + " §7" + feroPlayer.getRoleLevel() + "§f]" : "";
+    final String out = this.getNameChatColor() + who.getName() + "§f [" + this.getIcon().getChar() + "]" + roleIcon + " >> §7" + msg;
     who.getLocation().getNearbyPlayers(80).forEach(pl -> {
       if (!this.members.contains(pl.getUniqueId())) {
         pl.sendMessage("§f!" + out);

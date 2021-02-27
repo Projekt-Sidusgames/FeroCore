@@ -2,6 +2,8 @@ package com.gestankbratwurst.ferocore.modules.customrecipes;
 
 import com.gestankbratwurst.ferocore.util.Msg;
 import com.gestankbratwurst.ferocore.util.common.UtilInv;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Bukkit;
@@ -34,6 +36,10 @@ public class CustomRecipeManager {
     this.shapedRecipeMap.put(recipe.getKey(), customShapedRecipe);
     this.simpleShapedRecipeMap.put(recipe.getKey().getKey(), customShapedRecipe);
     Bukkit.addRecipe(recipe);
+  }
+
+  public Collection<CustomShapedRecipe> getShapedRecipes() {
+    return new ArrayList<>(this.shapedRecipeMap.values());
   }
 
   protected void handleShapedPrepare(final PrepareItemCraftEvent event, final ShapedRecipe recipe) {

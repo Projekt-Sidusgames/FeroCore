@@ -45,6 +45,10 @@ public abstract class SkillShot implements TickableSkill {
   private final Vector direction;
   private double speed;
 
+  public void start() {
+    SkillModule.addTickableSkill(this);
+  }
+
   private void detectDirectionChanges() {
     if (this.directionChanged) {
       this.directionChanged = false;

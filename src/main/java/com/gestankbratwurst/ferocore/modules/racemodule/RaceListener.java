@@ -147,7 +147,7 @@ public class RaceListener implements Listener {
       if (feroPlayer.hasChosenRace()) {
         final Player player = Bukkit.getPlayer(playerID);
         if (player != null) {
-          feroPlayer.getRace().onChat(player, msg);
+          feroPlayer.getRace().onChat(feroPlayer, player, msg);
         }
       }
     });

@@ -91,6 +91,7 @@ public class UtilModule implements BaseModule {
     this.protocolAPI = new ProtocolAPI(plugin);
     this.npcAPI = new NpcAPI(plugin);
     final EmptyTablist et = new EmptyTablist(this.tabListManager);
+    et.setFooter("Line 1\nLine 2");
     this.tabListManager = new TabListManager(plugin, (p) -> et);
   }
 
